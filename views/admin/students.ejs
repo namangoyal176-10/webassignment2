@@ -1,0 +1,126 @@
+<%- include('../partials/header') %>
+
+<div class="app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <div class="app-main">
+    <%- include('../partials/topbar') %>
+
+    <main class="app-content">
+      <%- include('../partials/flash') %>
+
+      <div class="page-header">
+        <div class="page-header-info">
+          <h1>Student Resident Directory</h1>
+          <p>Manage registered college residents, check room assignments, and process student room vacancies</p>
+        </div>
+      </div>
+
+      <!-- Filter & Search Bar -->
+      <div class="filter-bar">
+        <form action="/admin/students" method="GET" class="filter-form">
+          <div class="search-input-group">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" name="search" class="form-control" placeholder="Search by name, student ID, email..." value="<%= filters.search %>">
+          </div>
+
+          <select name="status" class="form-select" style="max-width: 180px;">
+            <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>All Students</option>
+            <option value="allotted" <%= filters.status === 'allotted' ? 'selected' : '' %>>Allotted Only</option>
+            <option value="unallotted" <%= filters.status === 'unallotted' ? 'selected' : '' %>>Unallotted Only</option>
+          </select>
+
+          <select name="block" class="form-select" style="max-width: 180px;">
+            <option value="">All Blocks</option>
+            <% blocks.forEach(function(b) { %>
+              <option value="<%= b._id %>" <%= filters.block === b._id.toString() ? 'selected' : '' %>><%= b.name %></option>
+            <% }); %>
+          </select>
+
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="fa-solid fa-filter"></i> Apply Filter
+          </button>
+          <a href="/admin/students" class="btn btn-secondary btn-sm">Reset</a>
+        </form>
+      </div>
+
+      <!-- Students Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fa-solid fa-user-graduate" style="color: var(--primary);"></i> Enrolled Students</h3>
+          <span class="badge badge-partially-occupied"><%= students.length %> Results</span>
+        </div>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Student ID</th>
+                <th>Contact</th>
+                <th>Allotted Room</th>
+                <th>Hostel Block</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (students && students.length > 0) { %>
+                <% students.forEach(function(s) { %>
+                  <tr>
+                    <td>
+                      <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <div class="user-avatar" style="width: 34px; height: 34px; font-size: 0.85rem;">
+                          <%= s.name ? s.name.charAt(0).toUpperCase() : 'S' %>
+                        </div>
+                        <div>
+                          <strong><%= s.name %></strong>
+                          <div style="font-size: 0.75rem; color: var(--slate-500);"><%= s.email %></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td><strong><%= s.studentId || 'N/A' %></strong></td>
+                    <td><%= s.phone || '—' %></td>
+                    <td>
+                      <% if (s.room) { %>
+                        <span class="badge badge-approved">
+                          Room <%= s.room.roomNumber %>
+                        </span>
+                      <% } else { %>
+                        <span class="badge badge-maintenance">Unallotted</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <%= s.room && s.room.block ? s.room.block.name : '—' %>
+                    </td>
+                    <td>
+                      <% if (s.room) { %>
+                        <!-- Vacate Student Button & Form -->
+                        <form action="/admin/students/<%= s._id %>/vacate" method="POST" onsubmit="return confirm('Are you sure you want to vacate <%= s.name %> from Room <%= s.room.roomNumber %>? This will immediately free up their bed in the database.');" style="display: inline;">
+                          <input type="hidden" name="redirectTo" value="/admin/students">
+                          <button type="submit" class="btn btn-danger btn-sm" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;">
+                            <i class="fa-solid fa-person-walking-dashed-line-arrow-right"></i> Vacate Bed
+                          </button>
+                        </form>
+                      <% } else { %>
+                        <a href="/admin/rooms" class="btn btn-outline btn-sm" style="padding: 0.35rem 0.65rem; font-size: 0.75rem;">
+                          <i class="fa-solid fa-plus"></i> Allot
+                        </a>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } else { %>
+                <tr>
+                  <td colspan="6" style="text-align: center; color: var(--slate-400); padding: 3rem;">
+                    No students match the selected search and filter criteria.
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

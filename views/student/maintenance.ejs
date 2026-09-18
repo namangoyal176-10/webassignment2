@@ -1,0 +1,148 @@
+<%- include('../partials/header') %>
+
+<div class="app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <div class="app-main">
+    <%- include('../partials/topbar') %>
+
+    <main class="app-content">
+      <%- include('../partials/flash') %>
+
+      <div class="page-header">
+        <div class="page-header-info">
+          <h1>Maintenance Requests</h1>
+          <p>Report hostel room damages, electrical faults, plumbing issues, or internet connection trouble</p>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Maintenance Submission Form -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-screwdriver-wrench" style="color: var(--primary);"></i> Raise New Ticket</h3>
+          </div>
+          <div class="card-body">
+            <% if (!room) { %>
+              <div class="alert alert-warning" style="margin-bottom: 0;">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <div>
+                  <strong>Room Required:</strong> You must have an active room allotment before raising a room maintenance request.
+                </div>
+              </div>
+            <% } else { %>
+              <form action="/student/maintenance" method="POST">
+                <div class="form-group">
+                  <label class="form-label">Room Location</label>
+                  <input type="text" class="form-control" value="Room <%= room.roomNumber %> (<%= room.block ? room.block.name : 'Hostel' %>)" disabled style="background: var(--slate-100);">
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                  <div class="form-group">
+                    <label class="form-label" for="ticketCategory">Category *</label>
+                    <select name="category" id="ticketCategory" class="form-select" required>
+                      <option value="" disabled selected>-- Select category --</option>
+                      <option value="Electrical">Electrical (Light, Fan, Socket)</option>
+                      <option value="Plumbing">Plumbing (Tap, Leakage, Flush)</option>
+                      <option value="Furniture">Furniture (Bed, Study Table, Wardrobe)</option>
+                      <option value="Cleaning">Cleaning & Sanitation</option>
+                      <option value="Internet">Internet / LAN / Wi-Fi</option>
+                      <option value="Other">Other Issues</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label class="form-label" for="ticketPriority">Priority Level *</label>
+                    <select name="priority" id="ticketPriority" class="form-select" required>
+                      <option value="Low">Low (General inquiry)</option>
+                      <option value="Medium" selected>Medium (Routine repair)</option>
+                      <option value="High">High (Impacting daily work)</option>
+                      <option value="Urgent">Urgent (Safety or water hazard)</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="ticketDescription">Issue Description *</label>
+                  <textarea name="description" id="ticketDescription" class="form-control" placeholder="Provide specific details about the issue (e.g., tube light flickers, bathroom tap leaking constantly)..." required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">
+                  <i class="fa-solid fa-paper-plane"></i> Submit Maintenance Ticket
+                </button>
+              </form>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- SLA & Instructions -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-clock" style="color: var(--secondary);"></i> Resolution Timelines (SLA)</h3>
+          </div>
+          <div class="card-body" style="font-size: 0.875rem; color: var(--slate-600); display: flex; flex-direction: column; gap: 1rem;">
+            <div style="border-left: 3px solid #ef4444; padding-left: 0.75rem;">
+              <strong style="color: var(--slate-900);">Urgent Priority:</strong> Attended within 4-6 hours (water leaks, short circuits).
+            </div>
+            <div style="border-left: 3px solid #f59e0b; padding-left: 0.75rem;">
+              <strong style="color: var(--slate-900);">High Priority:</strong> Attended within 24 hours (fan stoppage, Wi-Fi outage).
+            </div>
+            <div style="border-left: 3px solid #3b82f6; padding-left: 0.75rem;">
+              <strong style="color: var(--slate-900);">Medium / Low Priority:</strong> Attended within 48-72 hours (carpentry, minor touch-ups).
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tickets History -->
+      <div class="card" style="margin-top: 1.75rem;">
+        <div class="card-header">
+          <h3><i class="fa-solid fa-list-check" style="color: var(--slate-600);"></i> My Maintenance Tickets</h3>
+          <span class="badge badge-partially-occupied"><%= requests.length %> Total Tickets</span>
+        </div>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Date Raised</th>
+                <th>Category</th>
+                <th>Priority</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Warden Remarks</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (requests && requests.length > 0) { %>
+                <% requests.forEach(function(t) { %>
+                  <tr>
+                    <td><%= new Date(t.createdAt).toLocaleDateString() %></td>
+                    <td><strong><%= t.category %></strong></td>
+                    <td>
+                      <span class="badge <%= t.priority === 'Urgent' ? 'badge-full' : t.priority === 'High' ? 'badge-pending' : 'badge-maintenance' %>">
+                        <%= t.priority %>
+                      </span>
+                    </td>
+                    <td><%= t.description %></td>
+                    <td>
+                      <span class="badge <%= t.status === 'Resolved' ? 'badge-resolved' : t.status === 'In Progress' ? 'badge-in-progress' : t.status === 'Rejected' ? 'badge-rejected' : 'badge-pending' %>">
+                        <%= t.status %>
+                      </span>
+                    </td>
+                    <td><%= t.adminRemarks || '—' %></td>
+                  </tr>
+                <% }); %>
+              <% } else { %>
+                <tr>
+                  <td colspan="6" style="text-align: center; color: var(--slate-400); padding: 2rem;">No maintenance tickets submitted yet.</td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

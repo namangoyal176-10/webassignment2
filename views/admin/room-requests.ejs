@@ -1,0 +1,158 @@
+<%- include('../partials/header') %>
+
+<div class="app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <div class="app-main">
+    <%- include('../partials/topbar') %>
+
+    <main class="app-content">
+      <%- include('../partials/flash') %>
+
+      <div class="page-header">
+        <div class="page-header-info">
+          <h1>Room Allotment Requests</h1>
+          <p>Review student applications for hostel accommodation and assign vacant beds</p>
+        </div>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <a href="/admin/room-requests" class="btn <%= selectedStatus === 'All' ? 'btn-primary' : 'btn-outline' %> btn-sm">All Requests</a>
+          <a href="/admin/room-requests?status=Pending" class="btn <%= selectedStatus === 'Pending' ? 'btn-primary' : 'btn-outline' %> btn-sm">Pending Only</a>
+          <a href="/admin/room-requests?status=Approved" class="btn <%= selectedStatus === 'Approved' ? 'btn-primary' : 'btn-outline' %> btn-sm">Approved</a>
+          <a href="/admin/room-requests?status=Rejected" class="btn <%= selectedStatus === 'Rejected' ? 'btn-primary' : 'btn-outline' %> btn-sm">Rejected</a>
+        </div>
+      </div>
+
+      <!-- Requests Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fa-solid fa-list-check" style="color: var(--primary);"></i> Applications (<%= requests.length %>)</h3>
+        </div>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Applicant</th>
+                <th>Student ID</th>
+                <th>Preferred Block</th>
+                <th>Room Type</th>
+                <th>Reason / Notes</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (requests && requests.length > 0) { %>
+                <% requests.forEach(function(r) { %>
+                  <tr>
+                    <td>
+                      <strong><%= r.student ? r.student.name : 'Unknown Student' %></strong>
+                      <div style="font-size: 0.75rem; color: var(--slate-500);"><%= r.student ? r.student.email : '' %></div>
+                    </td>
+                    <td><strong><%= r.student ? r.student.studentId : '—' %></strong></td>
+                    <td><%= r.preferredBlock ? r.preferredBlock.name : 'Any Block' %></td>
+                    <td><%= r.preferredRoomType %></td>
+                    <td><%= r.reason || 'None provided' %></td>
+                    <td>
+                      <span class="badge <%= r.status === 'Approved' ? 'badge-approved' : r.status === 'Rejected' ? 'badge-rejected' : 'badge-pending' %>">
+                        <%= r.status %>
+                      </span>
+                      <% if (r.adminRemarks) { %>
+                        <div style="font-size: 0.7rem; color: var(--slate-500); margin-top: 0.2rem;"><%= r.adminRemarks %></div>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (r.status === 'Pending') { %>
+                        <div style="display: flex; gap: 0.35rem;">
+                          <button type="button" class="btn btn-success btn-sm" data-modal-target="#approveModal-<%= r._id %>">
+                            <i class="fa-solid fa-check"></i> Approve
+                          </button>
+                          <button type="button" class="btn btn-danger btn-sm" data-modal-target="#rejectModal-<%= r._id %>">
+                            <i class="fa-solid fa-xmark"></i> Reject
+                          </button>
+                        </div>
+
+                        <!-- Approve Modal -->
+                        <div class="modal-backdrop" id="approveModal-<%= r._id %>">
+                          <div class="modal-dialog">
+                            <div class="modal-header">
+                              <h4>Approve Allotment: <%= r.student ? r.student.name : '' %></h4>
+                              <button type="button" class="modal-close" data-modal-close>&times;</button>
+                            </div>
+                            <form action="/admin/room-requests/<%= r._id %>/approve" method="POST">
+                              <div class="modal-body">
+                                <p style="font-size: 0.875rem; color: var(--slate-600); margin-bottom: 1rem;">
+                                  Requested: <strong><%= r.preferredRoomType %></strong> in <strong><%= r.preferredBlock ? r.preferredBlock.name : 'Preferred Block' %></strong>.
+                                </p>
+
+                                <div class="form-group">
+                                  <label class="form-label" for="assignedRoomId-<%= r._id %>">Select Target Room *</label>
+                                  <select name="assignedRoomId" id="assignedRoomId-<%= r._id %>" class="form-select" required>
+                                    <option value="" disabled selected>-- Select a room with capacity --</option>
+                                    <% availableRooms.forEach(function(room) { %>
+                                      <option value="<%= room._id %>">
+                                        Room <%= room.roomNumber %> (<%= room.block ? room.block.name : '' %> - <%= room.roomType %>) &bull; <%= room.capacity - room.occupiedBeds %> beds free
+                                      </option>
+                                    <% }); %>
+                                  </select>
+                                </div>
+
+                                <div class="form-group">
+                                  <label class="form-label">Warden Remarks (Optional)</label>
+                                  <input type="text" name="remarks" class="form-control" placeholder="E.g., Allocated ground floor as requested">
+                                </div>
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary btn-sm" data-modal-close>Cancel</button>
+                                <button type="submit" class="btn btn-success btn-sm">Confirm & Allot</button>
+                              </div>
+                            </form>
+                          </div>
+                        </div>
+
+                        <!-- Reject Modal -->
+                        <div class="modal-backdrop" id="rejectModal-<%= r._id %>">
+                          <div class="modal-dialog">
+                            <div class="modal-header">
+                              <h4>Reject Request: <%= r.student ? r.student.name : '' %></h4>
+                              <button type="button" class="modal-close" data-modal-close>&times;</button>
+                            </div>
+                            <form action="/admin/room-requests/<%= r._id %>/reject" method="POST">
+                              <div class="modal-body">
+                                <div class="form-group">
+                                  <label class="form-label">Reason for Rejection *</label>
+                                  <textarea name="remarks" class="form-control" placeholder="E.g., Full block occupancy or ineligibility..." required></textarea>
+                                </div>
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary btn-sm" data-modal-close>Cancel</button>
+                                <button type="submit" class="btn btn-danger btn-sm">Confirm Rejection</button>
+                              </div>
+                            </form>
+                          </div>
+                        </div>
+                      <% } else { %>
+                        <span style="color: var(--slate-400); font-size: 0.8rem;">Reviewed</span>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } else { %>
+                <tr>
+                  <td colspan="7" style="text-align: center; color: var(--slate-400); padding: 3rem;">
+                    No room allotment requests found matching filter.
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

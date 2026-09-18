@@ -1,0 +1,116 @@
+<%- include('../partials/header') %>
+
+<div class="app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <div class="app-main">
+    <%- include('../partials/topbar') %>
+
+    <main class="app-content">
+      <%- include('../partials/flash') %>
+
+      <div class="page-header">
+        <div class="page-header-info">
+          <h1>Room Transfer Requests</h1>
+          <p>Review and execute room reassignment requests with automatic occupancy synchronization</p>
+        </div>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <a href="/admin/room-change-requests" class="btn <%= selectedStatus === 'All' ? 'btn-primary' : 'btn-outline' %> btn-sm">All Transfers</a>
+          <a href="/admin/room-change-requests?status=Pending" class="btn <%= selectedStatus === 'Pending' ? 'btn-primary' : 'btn-outline' %> btn-sm">Pending Only</a>
+          <a href="/admin/room-change-requests?status=Approved" class="btn <%= selectedStatus === 'Approved' ? 'btn-primary' : 'btn-outline' %> btn-sm">Approved</a>
+          <a href="/admin/room-change-requests?status=Rejected" class="btn <%= selectedStatus === 'Rejected' ? 'btn-primary' : 'btn-outline' %> btn-sm">Rejected</a>
+        </div>
+      </div>
+
+      <!-- Requests Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fa-solid fa-arrow-right-arrow-left" style="color: var(--primary);"></i> Transfer Applications (<%= requests.length %>)</h3>
+        </div>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Current Room</th>
+                <th>Requested Target Room</th>
+                <th>Reason</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (requests && requests.length > 0) { %>
+                <% requests.forEach(function(reqItem) { %>
+                  <tr>
+                    <td>
+                      <strong><%= reqItem.student ? reqItem.student.name : 'Unknown' %></strong>
+                      <div style="font-size: 0.75rem; color: var(--slate-500);"><%= reqItem.student ? reqItem.student.studentId : '' %></div>
+                    </td>
+                    <td>
+                      <% if (reqItem.currentRoom) { %>
+                        <strong>Room <%= reqItem.currentRoom.roomNumber %></strong>
+                        <div style="font-size: 0.75rem; color: var(--slate-500);"><%= reqItem.currentRoom.block ? reqItem.currentRoom.block.name : '' %></div>
+                      <% } else { %>
+                        —
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (reqItem.requestedRoom) { %>
+                        <strong>Room <%= reqItem.requestedRoom.roomNumber %></strong>
+                        <div style="font-size: 0.75rem; color: var(--slate-500);">
+                          <%= reqItem.requestedRoom.block ? reqItem.requestedRoom.block.name : '' %> (<%= reqItem.requestedRoom.occupiedBeds %>/<%= reqItem.requestedRoom.capacity %> beds)
+                        </div>
+                      <% } else { %>
+                        —
+                      <% } %>
+                    </td>
+                    <td><%= reqItem.reason %></td>
+                    <td>
+                      <span class="badge <%= reqItem.status === 'Approved' ? 'badge-approved' : reqItem.status === 'Rejected' ? 'badge-rejected' : 'badge-pending' %>">
+                        <%= reqItem.status %>
+                      </span>
+                      <% if (reqItem.adminRemarks) { %>
+                        <div style="font-size: 0.7rem; color: var(--slate-500); margin-top: 0.2rem;"><%= reqItem.adminRemarks %></div>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (reqItem.status === 'Pending') { %>
+                        <div style="display: flex; gap: 0.35rem;">
+                          <form action="/admin/room-change-requests/<%= reqItem._id %>/approve" method="POST" onsubmit="return confirm('Approve transfer? The student will be transferred and bed occupancies updated.');" style="margin: 0;">
+                            <button type="submit" class="btn btn-success btn-sm" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;">
+                              <i class="fa-solid fa-check"></i> Approve
+                            </button>
+                          </form>
+                          <form action="/admin/room-change-requests/<%= reqItem._id %>/reject" method="POST" onsubmit="return confirm('Reject transfer request?');" style="margin: 0;">
+                            <button type="submit" class="btn btn-danger btn-sm" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;">
+                              <i class="fa-solid fa-xmark"></i> Reject
+                            </button>
+                          </form>
+                        </div>
+                      <% } else { %>
+                        <span style="color: var(--slate-400); font-size: 0.8rem;">Reviewed</span>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } else { %>
+                <tr>
+                  <td colspan="6" style="text-align: center; color: var(--slate-400); padding: 3rem;">
+                    No room transfer requests found matching filter.
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

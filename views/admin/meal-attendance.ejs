@@ -1,0 +1,100 @@
+<%- include('../partials/header') %>
+
+<div class="app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <div class="app-main">
+    <%- include('../partials/topbar') %>
+
+    <main class="app-content">
+      <%- include('../partials/flash') %>
+
+      <div class="page-header">
+        <div class="page-header-info">
+          <h1>Daily Meal Attendance Registry</h1>
+          <p>Record student mess check-ins used for calculating monthly dining attendance and billing</p>
+        </div>
+      </div>
+
+      <!-- Date Selection Bar -->
+      <div class="filter-bar">
+        <form action="/admin/meal-attendance" method="GET" class="filter-form">
+          <label class="form-label" style="margin-bottom: 0; font-size: 0.875rem;">Attendance Date:</label>
+          <input type="date" name="date" class="form-control" value="<%= date %>" style="max-width: 180px;">
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="fa-solid fa-calendar-day"></i> Load Date
+          </button>
+        </form>
+      </div>
+
+      <!-- Attendance Entry Form -->
+      <form action="/admin/meal-attendance" method="POST">
+        <input type="hidden" name="date" value="<%= date %>">
+
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-clipboard-user" style="color: var(--primary);"></i> Meal Check-Ins for <%= date %></h3>
+            <button type="submit" class="btn btn-success btn-sm">
+              <i class="fa-solid fa-floppy-disk"></i> Save Attendance
+            </button>
+          </div>
+          <div class="table-container">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Student Name</th>
+                  <th>Student ID</th>
+                  <th>Room</th>
+                  <th style="text-align: center;">Breakfast</th>
+                  <th style="text-align: center;">Lunch</th>
+                  <th style="text-align: center;">Snacks</th>
+                  <th style="text-align: center;">Dinner</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (students && students.length > 0) { %>
+                  <% students.forEach(function(s) { %>
+                    <% const record = recordMap[s._id.toString()] || {}; %>
+                    <tr>
+                      <td>
+                        <strong><%= s.name %></strong>
+                        <div style="font-size: 0.75rem; color: var(--slate-500);"><%= s.email %></div>
+                      </td>
+                      <td><%= s.studentId || '—' %></td>
+                      <td><%= s.room ? 'Room ' + s.room.roomNumber : 'Unallotted' %></td>
+                      <td style="text-align: center;">
+                        <input type="checkbox" name="attendance[<%= s._id %>][breakfast]" <%= record.breakfast ? 'checked' : '' %> style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary);">
+                      </td>
+                      <td style="text-align: center;">
+                        <input type="checkbox" name="attendance[<%= s._id %>][lunch]" <%= record.lunch ? 'checked' : '' %> style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary);">
+                      </td>
+                      <td style="text-align: center;">
+                        <input type="checkbox" name="attendance[<%= s._id %>][snacks]" <%= record.snacks ? 'checked' : '' %> style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary);">
+                      </td>
+                      <td style="text-align: center;">
+                        <input type="checkbox" name="attendance[<%= s._id %>][dinner]" <%= record.dinner ? 'checked' : '' %> style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary);">
+                      </td>
+                    </tr>
+                  <% }); %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="7" style="text-align: center; color: var(--slate-400); padding: 3rem;">
+                      No registered students found.
+                    </td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+          <div class="card-footer" style="justify-content: flex-end;">
+            <button type="submit" class="btn btn-success">
+              <i class="fa-solid fa-floppy-disk"></i> Save Attendance Records
+            </button>
+          </div>
+        </div>
+      </form>
+    </main>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

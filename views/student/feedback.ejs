@@ -1,0 +1,127 @@
+<%- include('../partials/header') %>
+
+<div class="app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <div class="app-main">
+    <%- include('../partials/topbar') %>
+
+    <main class="app-content">
+      <%- include('../partials/flash') %>
+
+      <div class="page-header">
+        <div class="page-header-info">
+          <h1>Meal Feedback & Ratings</h1>
+          <p>Help improve food quality by sharing your dining experience and ratings</p>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Submit Feedback Form -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-star" style="color: #f59e0b;"></i> Submit Meal Review</h3>
+          </div>
+          <div class="card-body">
+            <form action="/student/feedback" method="POST">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                  <label class="form-label" for="feedbackDate">Date *</label>
+                  <input type="date" id="feedbackDate" name="date" class="form-control" value="<%= today %>" required>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="feedbackMeal">Meal Type *</label>
+                  <select name="mealType" id="feedbackMeal" class="form-select" required>
+                    <option value="Breakfast">Breakfast</option>
+                    <option value="Lunch" selected>Lunch</option>
+                    <option value="Snacks">Evening Snacks</option>
+                    <option value="Dinner">Dinner</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Quality Rating (1 to 5 Stars) *</label>
+                <div class="star-rating-select" style="margin: 0.5rem 0;">
+                  <input type="radio" id="star5" name="rating" value="5" required /><label for="star5" title="5 stars - Excellent"><i class="fa-solid fa-star"></i></label>
+                  <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 stars - Good"><i class="fa-solid fa-star"></i></label>
+                  <input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3 stars - Average"><i class="fa-solid fa-star"></i></label>
+                  <input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2 stars - Poor"><i class="fa-solid fa-star"></i></label>
+                  <input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="1 star - Very Bad"><i class="fa-solid fa-star"></i></label>
+                </div>
+                <span class="form-hint">Click a star to select rating. (Duplicate feedback for the same meal on the same day is prevented).</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="feedbackComment">Comments / Suggestions</label>
+                <textarea name="comment" id="feedbackComment" class="form-control" placeholder="Mention specific dishes, taste, hygiene, or quantity feedback..."></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block">
+                <i class="fa-solid fa-paper-plane"></i> Record Feedback
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Feedback Policy -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-utensils" style="color: var(--secondary);"></i> Mess Quality Assurance</h3>
+          </div>
+          <div class="card-body" style="font-size: 0.875rem; color: var(--slate-600); display: flex; flex-direction: column; gap: 0.85rem;">
+            <p>1. <strong>Direct Warden Review:</strong> Every rating and comment is summarized on the Warden's Mess Analytics dashboard.</p>
+            <p>2. <strong>One Review Per Meal:</strong> To maintain genuine statistics, students can submit one review per meal (Breakfast, Lunch, Snacks, Dinner) each calendar day.</p>
+            <p>3. <strong>Vendor Penalties:</strong> Consistently low meal ratings prompt an inspection of mess caterer procurement and hygiene compliance.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feedback History -->
+      <div class="card" style="margin-top: 1.75rem;">
+        <div class="card-header">
+          <h3><i class="fa-solid fa-clock-rotate-left" style="color: var(--slate-600);"></i> My Past Reviews</h3>
+          <span class="badge badge-partially-occupied"><%= feedbacks.length %> Reviews</span>
+        </div>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Meal</th>
+                <th>Rating</th>
+                <th>Comment</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (feedbacks && feedbacks.length > 0) { %>
+                <% feedbacks.forEach(function(f) { %>
+                  <tr>
+                    <td><%= f.date %></td>
+                    <td><strong><%= f.mealType %></strong></td>
+                    <td>
+                      <div class="star-rating">
+                        <% for (let i = 1; i <= 5; i++) { %>
+                          <i class="fa-<%= i <= f.rating ? 'solid' : 'regular' %> fa-star"></i>
+                        <% } %>
+                        <span style="color: var(--slate-700); font-weight: 700; margin-left: 0.35rem; font-size: 0.8rem;">(<%= f.rating %>/5)</span>
+                      </div>
+                    </td>
+                    <td><%= f.comment || 'No written comment provided' %></td>
+                  </tr>
+                <% }); %>
+              <% } else { %>
+                <tr>
+                  <td colspan="4" style="text-align: center; color: var(--slate-400); padding: 2rem;">No meal reviews submitted yet.</td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

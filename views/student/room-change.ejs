@@ -1,0 +1,125 @@
+<%- include('../partials/header') %>
+
+<div class="app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <div class="app-main">
+    <%- include('../partials/topbar') %>
+
+    <main class="app-content">
+      <%- include('../partials/flash') %>
+
+      <div class="page-header">
+        <div class="page-header-info">
+          <h1>Room Change Request</h1>
+          <p>Request a transfer from your currently allotted room to another room with available beds</p>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Room Change Form -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-arrow-right-arrow-left" style="color: var(--primary);"></i> Submit Transfer Request</h3>
+          </div>
+          <div class="card-body">
+            <% if (hasPendingRequest) { %>
+              <div class="alert alert-warning" style="margin-bottom: 0;">
+                <i class="fa-solid fa-clock"></i>
+                <div>
+                  <strong>Transfer Under Review:</strong> You already have a pending room change request. Please wait for the warden's review before submitting a new one.
+                </div>
+              </div>
+            <% } else { %>
+              <form action="/student/room-change" method="POST">
+                <div class="form-group">
+                  <label class="form-label">Current Allotted Room</label>
+                  <input type="text" class="form-control" value="Room <%= currentRoom.roomNumber %> (<%= currentRoom.block ? currentRoom.block.name : '' %> - <%= currentRoom.roomType %>)" disabled style="background: var(--slate-100);">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="requestedRoom">Target Room with Available Beds *</label>
+                  <select name="requestedRoom" id="requestedRoom" class="form-select" required>
+                    <option value="" disabled selected>-- Select an available room --</option>
+                    <% availableRooms.forEach(function(r) { %>
+                      <option value="<%= r._id %>">
+                        Room <%= r.roomNumber %> &bull; <%= r.block ? r.block.name : 'Hostel' %> &bull; <%= r.roomType %> (<%= r.capacity - r.occupiedBeds %> <%= r.capacity - r.occupiedBeds > 1 ? 'beds' : 'bed' %> available)
+                      </option>
+                    <% }); %>
+                  </select>
+                  <span class="form-hint">Only rooms that have at least one free bed and are not in maintenance are displayed.</span>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="changeReason">Reason for Transfer Request *</label>
+                  <textarea name="reason" id="changeReason" class="form-control" placeholder="Specify why you wish to change rooms (e.g. mutual agreement, department change, noise levels)..." required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">
+                  <i class="fa-solid fa-paper-plane"></i> Submit Transfer Request
+                </button>
+              </form>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- Transfer Policy Card -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-shield-halved" style="color: var(--secondary);"></i> Transfer Policy</h3>
+          </div>
+          <div class="card-body" style="font-size: 0.875rem; color: var(--slate-600); display: flex; flex-direction: column; gap: 0.85rem;">
+            <p>1. <strong>Strict Capacity Checks:</strong> Upon approval, the system atomically shifts your allocation: freeing up your current bed while claiming a bed in the new room.</p>
+            <p>2. <strong>One Active Request:</strong> You can only have one pending room change request at a time.</p>
+            <p>3. <strong>Immediate Effect:</strong> As soon as the warden clicks approve, your room details and roommates will automatically update across the portal.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Past Transfer Requests -->
+      <div class="card" style="margin-top: 1.75rem;">
+        <div class="card-header">
+          <h3><i class="fa-solid fa-clock-rotate-left" style="color: var(--slate-600);"></i> Room Change History</h3>
+        </div>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>From Room</th>
+                <th>Requested Room</th>
+                <th>Reason</th>
+                <th>Status</th>
+                <th>Warden Remarks</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (requests && requests.length > 0) { %>
+                <% requests.forEach(function(reqItem) { %>
+                  <tr>
+                    <td><%= new Date(reqItem.createdAt).toLocaleDateString() %></td>
+                    <td>Room <%= reqItem.currentRoom ? reqItem.currentRoom.roomNumber : 'N/A' %></td>
+                    <td>Room <%= reqItem.requestedRoom ? reqItem.requestedRoom.roomNumber : 'N/A' %></td>
+                    <td><%= reqItem.reason %></td>
+                    <td>
+                      <span class="badge <%= reqItem.status === 'Approved' ? 'badge-approved' : reqItem.status === 'Rejected' ? 'badge-rejected' : 'badge-pending' %>">
+                        <%= reqItem.status %>
+                      </span>
+                    </td>
+                    <td><%= reqItem.adminRemarks || '—' %></td>
+                  </tr>
+                <% }); %>
+              <% } else { %>
+                <tr>
+                  <td colspan="6" style="text-align: center; color: var(--slate-400); padding: 2rem;">No transfer requests submitted yet.</td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

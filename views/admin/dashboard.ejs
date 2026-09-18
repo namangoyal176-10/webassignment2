@@ -1,0 +1,204 @@
+<%- include('../partials/header') %>
+
+<div class="app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <div class="app-main">
+    <%- include('../partials/topbar') %>
+
+    <main class="app-content">
+      <%- include('../partials/flash') %>
+
+      <!-- Dashboard Header -->
+      <div class="page-header">
+        <div class="page-header-info">
+          <h1>Warden Administration Dashboard</h1>
+          <p>Real-time hostel occupancy metrics, pending resident applications, and dining statistics</p>
+        </div>
+        <div class="page-actions">
+          <a href="/admin/rooms" class="btn btn-outline btn-sm">
+            <i class="fa-solid fa-bed"></i> Room Inventory
+          </a>
+          <a href="/admin/room-requests" class="btn btn-primary btn-sm">
+            <i class="fa-solid fa-list-check"></i> Review Requests (<%= stats.pendingRoomRequests %>)
+          </a>
+        </div>
+      </div>
+
+      <!-- Top Row: Hostel Statistics (KPI Cards) -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-content">
+            <h4>Occupancy Rate</h4>
+            <div class="stat-value"><%= stats.occupancyPercent %>%</div>
+            <div class="stat-subtext"><%= stats.occupiedBeds %> of <%= stats.totalBeds %> total beds filled</div>
+          </div>
+          <div class="stat-icon-box stat-icon-indigo">
+            <i class="fa-solid fa-chart-pie"></i>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-content">
+            <h4>Available Beds</h4>
+            <div class="stat-value" style="color: var(--success);"><%= stats.availableBeds %></div>
+            <div class="stat-subtext">Across <%= stats.totalRooms %> hostel rooms</div>
+          </div>
+          <div class="stat-icon-box stat-icon-emerald">
+            <i class="fa-solid fa-bed"></i>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-content">
+            <h4>Pending Requests</h4>
+            <div class="stat-value" style="color: var(--warning);"><%= stats.pendingRoomRequests + stats.pendingRoomChangeRequests %></div>
+            <div class="stat-subtext"><%= stats.pendingRoomRequests %> allotment &bull; <%= stats.pendingRoomChangeRequests %> transfer</div>
+          </div>
+          <div class="stat-icon-box stat-icon-amber">
+            <i class="fa-solid fa-clock"></i>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-content">
+            <h4>Mess Rating</h4>
+            <div class="stat-value"><%= stats.avgRating %> <span style="font-size: 1rem; color: #f59e0b;"><i class="fa-solid fa-star"></i></span></div>
+            <div class="stat-subtext">From <%= stats.totalFeedbackCount %> student ratings</div>
+          </div>
+          <div class="stat-icon-box stat-icon-blue">
+            <i class="fa-solid fa-star"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Second Row: Visual Charts Grid -->
+      <div class="grid-2" style="margin-bottom: 1.75rem;">
+        <!-- Block Occupancy Bar Chart -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-chart-simple" style="color: var(--primary);"></i> Block-wise Bed Capacity & Occupancy</h3>
+          </div>
+          <div class="card-body" style="height: 280px; position: relative;">
+            <canvas id="blockOccupancyChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Room Status Breakdown Doughnut Chart -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-chart-pie" style="color: var(--secondary);"></i> Room Status Distribution</h3>
+          </div>
+          <div class="card-body" style="height: 280px; position: relative;">
+            <canvas id="roomStatusChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Third Row: Recent Pending Requests & Maintenance Tickets -->
+      <div class="grid-2">
+        <!-- Pending Room Allotments -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-file-circle-plus" style="color: var(--primary);"></i> Pending Allotment Requests</h3>
+            <a href="/admin/room-requests" class="btn btn-outline btn-sm">View All &rarr;</a>
+          </div>
+          <div class="table-container">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Block</th>
+                  <th>Type</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (recentRequests && recentRequests.length > 0) { %>
+                  <% recentRequests.forEach(function(r) { %>
+                    <tr>
+                      <td>
+                        <strong><%= r.student ? r.student.name : 'Unknown' %></strong>
+                        <div style="font-size: 0.75rem; color: var(--slate-500);"><%= r.student ? r.student.studentId : '' %></div>
+                      </td>
+                      <td><%= r.preferredBlock ? r.preferredBlock.name : 'Any' %></td>
+                      <td><%= r.preferredRoomType %></td>
+                      <td>
+                        <a href="/admin/room-requests" class="btn btn-primary btn-sm" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;">
+                          Review
+                        </a>
+                      </td>
+                    </tr>
+                  <% }); %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="4" style="text-align: center; color: var(--slate-400); padding: 2rem;">No pending room requests.</td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Recent Maintenance Complaints -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-screwdriver-wrench" style="color: var(--info);"></i> Recent Maintenance Tickets</h3>
+            <a href="/admin/maintenance" class="btn btn-outline btn-sm">Manage &rarr;</a>
+          </div>
+          <div class="table-container">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Room</th>
+                  <th>Category</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (recentMaintenance && recentMaintenance.length > 0) { %>
+                  <% recentMaintenance.forEach(function(m) { %>
+                    <tr>
+                      <td>Room <%= m.room ? m.room.roomNumber : 'N/A' %></td>
+                      <td><%= m.category %></td>
+                      <td>
+                        <span class="badge <%= m.priority === 'Urgent' ? 'badge-full' : m.priority === 'High' ? 'badge-pending' : 'badge-maintenance' %>">
+                          <%= m.priority %>
+                        </span>
+                      </td>
+                      <td>
+                        <span class="badge <%= m.status === 'Resolved' ? 'badge-resolved' : m.status === 'In Progress' ? 'badge-in-progress' : 'badge-pending' %>">
+                          <%= m.status %>
+                        </span>
+                      </td>
+                    </tr>
+                  <% }); %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="4" style="text-align: center; color: var(--slate-400); padding: 2rem;">No maintenance tickets found.</td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Pass dynamic data to Chart.js -->
+<script>
+  window.chartData = {
+    blockNames: <%- JSON.stringify(blockBreakdown.map(b => b.name)) %>,
+    blockCapacities: <%- JSON.stringify(blockBreakdown.map(b => b.capacity)) %>,
+    blockOccupied: <%- JSON.stringify(blockBreakdown.map(b => b.occupied)) %>,
+    availableRooms: <%= stats.availableRoomsCount %>,
+    partialRooms: <%= stats.partiallyOccupiedRoomsCount %>,
+    fullRooms: <%= stats.fullRoomsCount %>,
+    maintenanceRooms: <%= stats.maintenanceRoomsCount %>,
+  };
+</script>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,152 @@
+<%- include('../partials/header') %>
+
+<div class="app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <div class="app-main">
+    <%- include('../partials/topbar') %>
+
+    <main class="app-content">
+      <%- include('../partials/flash') %>
+
+      <div class="page-header">
+        <div class="page-header-info">
+          <h1>My Room Details</h1>
+          <p>Complete overview of your hostel block, room specification, and roommates</p>
+        </div>
+        <div class="page-actions">
+          <% if (room) { %>
+            <a href="/student/room-change" class="btn btn-outline btn-sm">
+              <i class="fa-solid fa-arrow-right-arrow-left"></i> Request Room Change
+            </a>
+            <a href="/student/maintenance" class="btn btn-primary btn-sm">
+              <i class="fa-solid fa-screwdriver-wrench"></i> Report Issue
+            </a>
+          <% } else { %>
+            <a href="/student/room-request" class="btn btn-primary btn-sm">
+              <i class="fa-solid fa-file-circle-plus"></i> Apply for Room
+            </a>
+          <% } %>
+        </div>
+      </div>
+
+      <% if (room) { %>
+        <!-- Room Specifications -->
+        <div class="grid-3" style="margin-bottom: 1.75rem;">
+          <div class="card">
+            <div class="card-body">
+              <div style="font-size: 0.75rem; font-weight: 700; color: var(--slate-500); text-transform: uppercase;">Room & Block</div>
+              <div style="font-size: 1.5rem; font-weight: 800; color: var(--primary); margin: 0.35rem 0;">Room <%= room.roomNumber %></div>
+              <div style="font-size: 0.85rem; color: var(--slate-600);"><%= room.block ? room.block.name : 'N/A' %> (Code: <%= room.block ? room.block.blockNumber : '' %>)</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-body">
+              <div style="font-size: 0.75rem; font-weight: 700; color: var(--slate-500); text-transform: uppercase;">Room Type & Capacity</div>
+              <div style="font-size: 1.5rem; font-weight: 800; color: var(--slate-900); margin: 0.35rem 0;"><%= room.roomType %></div>
+              <div style="font-size: 0.85rem; color: var(--slate-600);">Capacity: <%= room.capacity %> <%= room.capacity > 1 ? 'Beds' : 'Bed' %></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-body">
+              <div style="font-size: 0.75rem; font-weight: 700; color: var(--slate-500); text-transform: uppercase;">Occupancy Status</div>
+              <div style="margin: 0.5rem 0;">
+                <span class="badge <%= room.status === 'Full' ? 'badge-full' : room.status === 'Partially Occupied' ? 'badge-partially-occupied' : 'badge-available' %>" style="font-size: 0.85rem;">
+                  <%= room.status %> (<%= room.occupiedBeds %> / <%= room.capacity %>)
+                </span>
+              </div>
+              <div class="progress" style="margin-top: 0.6rem;">
+                <div class="progress-bar <%= room.occupiedBeds >= room.capacity ? 'bg-danger' : 'bg-success' %>" style="width: <%= (room.occupiedBeds / room.capacity) * 100 %>%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Roommates List -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-users" style="color: var(--primary);"></i> Room Residents & Roommates</h3>
+            <span class="badge badge-partially-occupied"><%= room.students.length %> Residents</span>
+          </div>
+          <div class="table-container">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Resident Name</th>
+                  <th>Student ID</th>
+                  <th>Email Address</th>
+                  <th>Contact Phone</th>
+                  <th>Allotment Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% room.students.forEach(function(rStudent) { %>
+                  <tr>
+                    <td>
+                      <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                          <%= rStudent.name ? rStudent.name.charAt(0).toUpperCase() : 'S' %>
+                        </div>
+                        <div>
+                          <strong><%= rStudent.name %></strong>
+                          <% if (rStudent._id.toString() === student._id.toString()) { %>
+                            <span class="badge badge-available" style="margin-left: 0.4rem; font-size: 0.7rem;">You</span>
+                          <% } %>
+                        </div>
+                      </div>
+                    </td>
+                    <td><%= rStudent.studentId || 'N/A' %></td>
+                    <td><%= rStudent.email %></td>
+                    <td><%= rStudent.phone || 'N/A' %></td>
+                    <td>
+                      <span class="badge badge-approved">Active Resident</span>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Block Information & Amenities -->
+        <% if (room.block) { %>
+          <div class="card" style="margin-top: 1.75rem;">
+            <div class="card-header">
+              <h3><i class="fa-solid fa-building" style="color: var(--secondary);"></i> Block Details</h3>
+            </div>
+            <div class="card-body">
+              <p style="color: var(--slate-600); font-size: 0.9rem;"><%= room.block.description || 'Modern university residential block with high-speed WiFi, laundry facilities, study lounges, and 24/7 security.' %></p>
+              <div style="display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;">
+                <div style="background: var(--slate-50); padding: 0.6rem 1rem; border-radius: var(--radius-md); font-size: 0.85rem; border: 1px solid var(--slate-200);">
+                  <i class="fa-solid fa-venus-mars" style="color: var(--primary);"></i> Gender: <strong><%= room.block.gender %></strong>
+                </div>
+                <div style="background: var(--slate-50); padding: 0.6rem 1rem; border-radius: var(--radius-md); font-size: 0.85rem; border: 1px solid var(--slate-200);">
+                  <i class="fa-solid fa-door-open" style="color: var(--secondary);"></i> Total Rooms in Block: <strong><%= room.block.totalRooms %></strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% } %>
+
+      <% } else { %>
+        <!-- Empty State: Not allotted -->
+        <div class="card">
+          <div class="empty-state">
+            <div class="empty-state-icon">
+              <i class="fa-solid fa-bed"></i>
+            </div>
+            <h4>You do not have an active room allotment</h4>
+            <p>Please submit a room allotment application choosing your preferred hostel block and room sharing preferences.</p>
+            <a href="/student/room-request" class="btn btn-primary">
+              <i class="fa-solid fa-file-circle-plus"></i> Submit Room Request
+            </a>
+          </div>
+        </div>
+      <% } %>
+    </main>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

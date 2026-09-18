@@ -1,0 +1,107 @@
+<%- include('../partials/header') %>
+
+<div class="app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <div class="app-main">
+    <%- include('../partials/topbar') %>
+
+    <main class="app-content">
+      <%- include('../partials/flash') %>
+
+      <div class="page-header">
+        <div class="page-header-info">
+          <h1>My Profile & Security</h1>
+          <p>Manage your contact details, view enrollment records, and change your password</p>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Profile Information Card -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-id-card" style="color: var(--primary);"></i> Resident Information</h3>
+          </div>
+          <div class="card-body">
+            <div style="display: flex; align-items: center; gap: 1.25rem; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--slate-100);">
+              <div class="user-avatar" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                <%= student.name ? student.name.charAt(0).toUpperCase() : 'S' %>
+              </div>
+              <div>
+                <h3 style="font-size: 1.2rem;"><%= student.name %></h3>
+                <div style="color: var(--slate-500); font-size: 0.85rem;"><%= student.email %></div>
+                <span class="badge badge-partially-occupied" style="margin-top: 0.4rem;">Student Resident</span>
+              </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.85rem; font-size: 0.875rem;">
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: var(--slate-500);">Student / Enrollment ID:</span>
+                <strong><%= student.studentId || 'N/A' %></strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: var(--slate-500);">Registered Phone:</span>
+                <strong><%= student.phone || 'Not provided' %></strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: var(--slate-500);">Current Room Allotment:</span>
+                <strong>
+                  <%= student.room ? 'Room ' + student.room.roomNumber + ' (' + (student.room.block ? student.room.block.name : '') + ')' : 'Not Allotted' %>
+                </strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: var(--slate-500);">Member Since:</span>
+                <strong><%= new Date(student.createdAt).toLocaleDateString() %></strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Edit Profile & Security Form -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fa-solid fa-lock" style="color: var(--secondary);"></i> Update Phone & Password</h3>
+          </div>
+          <div class="card-body">
+            <form action="/student/profile" method="POST">
+              <div class="form-group">
+                <label class="form-label" for="profilePhone">Phone Number</label>
+                <div class="search-input-group" style="width: 100%;">
+                  <i class="fa-solid fa-phone"></i>
+                  <input type="tel" id="profilePhone" name="phone" class="form-control" value="<%= student.phone || '' %>" placeholder="9876543210">
+                </div>
+              </div>
+
+              <div style="margin: 1.5rem 0 1rem 0; padding-top: 1rem; border-top: 1px solid var(--slate-100);">
+                <h4 style="font-size: 0.95rem; margin-bottom: 0.75rem; color: var(--slate-800);">Change Account Password</h4>
+                <p style="font-size: 0.8rem; color: var(--slate-500); margin-bottom: 1rem;">Leave password fields blank if you do not want to modify it.</p>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="currentPassword">Current Password</label>
+                <div class="search-input-group" style="width: 100%;">
+                  <i class="fa-solid fa-key"></i>
+                  <input type="password" id="currentPassword" name="currentPassword" class="form-control" placeholder="Required to change password">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="newPassword">New Password</label>
+                <div class="search-input-group" style="width: 100%;">
+                  <i class="fa-solid fa-lock"></i>
+                  <input type="password" id="newPassword" name="newPassword" class="form-control" placeholder="At least 6 characters" minlength="6">
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block">
+                <i class="fa-solid fa-floppy-disk"></i> Save Profile Changes
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

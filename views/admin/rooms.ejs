@@ -1,0 +1,274 @@
+<%- include('../partials/header') %>
+
+<div class="app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <div class="app-main">
+    <%- include('../partials/topbar') %>
+
+    <main class="app-content">
+      <%- include('../partials/flash') %>
+
+      <div class="page-header">
+        <div class="page-header-info">
+          <h1>Hostel Room Inventory & Allocation</h1>
+          <p>Configure rooms, monitor capacity constraints, and execute direct student bed allotments</p>
+        </div>
+        <div class="page-actions">
+          <button type="button" class="btn btn-secondary btn-sm" data-modal-target="#directAllotModal">
+            <i class="fa-solid fa-user-plus"></i> Manual Allotment
+          </button>
+          <button type="button" class="btn btn-primary btn-sm" data-modal-target="#addRoomModal">
+            <i class="fa-solid fa-plus"></i> Add New Room
+          </button>
+        </div>
+      </div>
+
+      <!-- Filters & Search Bar -->
+      <div class="filter-bar">
+        <form action="/admin/rooms" method="GET" class="filter-form">
+          <div class="search-input-group">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" name="search" class="form-control" placeholder="Search room number (e.g. A-101)..." value="<%= filters.search %>">
+          </div>
+
+          <select name="block" class="form-select" style="max-width: 170px;">
+            <option value="">All Blocks</option>
+            <% blocks.forEach(function(b) { %>
+              <option value="<%= b._id %>" <%= filters.block === b._id.toString() ? 'selected' : '' %>><%= b.name %></option>
+            <% }); %>
+          </select>
+
+          <select name="roomType" class="form-select" style="max-width: 170px;">
+            <option value="">All Room Types</option>
+            <option value="Single" <%= filters.roomType === 'Single' ? 'selected' : '' %>>Single</option>
+            <option value="Double" <%= filters.roomType === 'Double' ? 'selected' : '' %>>Double</option>
+            <option value="Triple" <%= filters.roomType === 'Triple' ? 'selected' : '' %>>Triple</option>
+            <option value="Four Sharing" <%= filters.roomType === 'Four Sharing' ? 'selected' : '' %>>Four Sharing</option>
+          </select>
+
+          <select name="status" class="form-select" style="max-width: 170px;">
+            <option value="">All Statuses</option>
+            <option value="Available" <%= filters.status === 'Available' ? 'selected' : '' %>>Available</option>
+            <option value="Partially Occupied" <%= filters.status === 'Partially Occupied' ? 'selected' : '' %>>Partially Occupied</option>
+            <option value="Full" <%= filters.status === 'Full' ? 'selected' : '' %>>Full</option>
+            <option value="Maintenance" <%= filters.status === 'Maintenance' ? 'selected' : '' %>>Maintenance</option>
+          </select>
+
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="fa-solid fa-filter"></i> Filter
+          </button>
+          <a href="/admin/rooms" class="btn btn-secondary btn-sm">Reset</a>
+        </form>
+      </div>
+
+      <!-- Room Cards Grid -->
+      <div class="room-grid">
+        <% if (rooms && rooms.length > 0) { %>
+          <% rooms.forEach(function(room) { %>
+            <div class="room-card">
+              <div class="room-card-header">
+                <div>
+                  <div class="room-number">Room <%= room.roomNumber %></div>
+                  <div class="room-meta">
+                    <i class="fa-solid fa-building"></i> <%= room.block ? room.block.name : 'Unknown Block' %>
+                  </div>
+                </div>
+                <span class="badge <%= room.status === 'Full' ? 'badge-full' : room.status === 'Partially Occupied' ? 'badge-partially-occupied' : room.status === 'Maintenance' ? 'badge-maintenance' : 'badge-available' %>">
+                  <%= room.status %>
+                </span>
+              </div>
+
+              <!-- Bed Slot Indicator Icons -->
+              <div>
+                <div style="font-size: 0.75rem; font-weight: 600; color: var(--slate-500); margin-bottom: 0.25rem;">
+                  <%= room.roomType %> &bull; Occupancy: <%= room.occupiedBeds %> / <%= room.capacity %> Beds
+                </div>
+                <div class="bed-slots">
+                  <% for (let i = 0; i < room.capacity; i++) { %>
+                    <div class="bed-dot <%= i < room.occupiedBeds ? 'occupied' : 'empty' %>" title="<%= i < room.occupiedBeds ? 'Occupied Bed' : 'Vacant Bed' %>">
+                      <i class="fa-solid fa-bed"></i>
+                    </div>
+                  <% } %>
+                </div>
+              </div>
+
+              <!-- Current Residents List -->
+              <div class="room-residents">
+                <strong>Residents:</strong>
+                <% if (room.students && room.students.length > 0) { %>
+                  <ul>
+                    <% room.students.forEach(function(st) { %>
+                      <li style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>&bull; <%= st.name %> (<%= st.studentId || 'ID' %>)</span>
+                        <form action="/admin/students/<%= st._id %>/vacate" method="POST" onsubmit="return confirm('Vacate <%= st.name %>?');" style="margin: 0;">
+                          <input type="hidden" name="redirectTo" value="/admin/rooms">
+                          <button type="submit" class="btn btn-outline btn-sm" style="padding: 0.15rem 0.4rem; font-size: 0.65rem; color: var(--danger); border-color: var(--danger-border);">
+                            Vacate
+                          </button>
+                        </form>
+                      </li>
+                    <% }); %>
+                  </ul>
+                <% } else { %>
+                  <span style="color: var(--slate-400); font-size: 0.75rem;">No students assigned</span>
+                <% } %>
+              </div>
+
+              <!-- Room Actions -->
+              <div style="display: flex; justify-content: space-between; margin-top: auto; padding-top: 0.5rem; border-top: 1px solid var(--slate-100);">
+                <button type="button" class="btn btn-outline btn-sm" data-modal-target="#editRoomModal-<%= room._id %>">
+                  <i class="fa-solid fa-pen-to-square"></i> Edit
+                </button>
+                <form action="/admin/rooms/<%= room._id %>/delete" method="POST" onsubmit="return confirm('Are you sure you want to delete Room <%= room.roomNumber %>? Only allowed if vacant.');" style="margin: 0;">
+                  <button type="submit" class="btn btn-danger btn-sm">
+                    <i class="fa-solid fa-trash-can"></i> Delete
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            <!-- Edit Room Modal -->
+            <div class="modal-backdrop" id="editRoomModal-<%= room._id %>">
+              <div class="modal-dialog">
+                <div class="modal-header">
+                  <h4>Edit Room <%= room.roomNumber %></h4>
+                  <button type="button" class="modal-close" data-modal-close>&times;</button>
+                </div>
+                <form action="/admin/rooms/<%= room._id %>" method="POST">
+                  <div class="modal-body">
+                    <div class="form-group">
+                      <label class="form-label">Room Number *</label>
+                      <input type="text" name="roomNumber" class="form-control" value="<%= room.roomNumber %>" required>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Room Type *</label>
+                      <select name="roomType" class="form-select" required>
+                        <option value="Single" <%= room.roomType === 'Single' ? 'selected' : '' %>>Single (1 Bed)</option>
+                        <option value="Double" <%= room.roomType === 'Double' ? 'selected' : '' %>>Double (2 Beds)</option>
+                        <option value="Triple" <%= room.roomType === 'Triple' ? 'selected' : '' %>>Triple (3 Beds)</option>
+                        <option value="Four Sharing" <%= room.roomType === 'Four Sharing' ? 'selected' : '' %>>Four Sharing (4 Beds)</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Total Bed Capacity *</label>
+                      <input type="number" name="capacity" class="form-control" value="<%= room.capacity %>" min="<%= room.occupiedBeds %>" required>
+                      <span class="form-hint">Cannot be lower than currently occupied beds (<%= room.occupiedBeds %>).</span>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Status Override</label>
+                      <select name="status" class="form-select">
+                        <option value="Available" <%= room.status === 'Available' ? 'selected' : '' %>>Available (Computed automatically)</option>
+                        <option value="Maintenance" <%= room.status === 'Maintenance' ? 'selected' : '' %>>Maintenance (Lock room)</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-modal-close>Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Save Room</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <div class="card" style="grid-column: 1 / -1;">
+            <div class="empty-state">
+              <div class="empty-state-icon"><i class="fa-solid fa-door-closed"></i></div>
+              <h4>No rooms match your filter criteria</h4>
+              <p>Try resetting the search filters or add a new room to the inventory.</p>
+            </div>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Add Room Modal -->
+      <div class="modal-backdrop" id="addRoomModal">
+        <div class="modal-dialog">
+          <div class="modal-header">
+            <h4>Add New Hostel Room</h4>
+            <button type="button" class="modal-close" data-modal-close>&times;</button>
+          </div>
+          <form action="/admin/rooms" method="POST">
+            <div class="modal-body">
+              <div class="form-group">
+                <label class="form-label" for="newRoomNum">Room Number *</label>
+                <input type="text" id="newRoomNum" name="roomNumber" class="form-control" placeholder="E.g., A-101" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="newRoomBlock">Hostel Block *</label>
+                <select name="block" id="newRoomBlock" class="form-select" required>
+                  <option value="" disabled selected>-- Choose Hostel Block --</option>
+                  <% blocks.forEach(function(b) { %>
+                    <option value="<%= b._id %>"><%= b.name %> (<%= b.gender %> Block)</option>
+                  <% }); %>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="newRoomType">Room Type *</label>
+                <select name="roomType" id="newRoomType" class="form-select" required>
+                  <option value="Single">Single (1 Bed)</option>
+                  <option value="Double" selected>Double (2 Beds)</option>
+                  <option value="Triple">Triple (3 Beds)</option>
+                  <option value="Four Sharing">Four Sharing (4 Beds)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="newRoomCap">Bed Capacity (Optional override)</label>
+                <input type="number" id="newRoomCap" name="capacity" class="form-control" placeholder="Default depends on room type" min="1">
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary btn-sm" data-modal-close>Cancel</button>
+              <button type="submit" class="btn btn-primary btn-sm">Create Room</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Direct Allotment Modal -->
+      <div class="modal-backdrop" id="directAllotModal">
+        <div class="modal-dialog">
+          <div class="modal-header">
+            <h4>Direct Student Bed Allotment</h4>
+            <button type="button" class="modal-close" data-modal-close>&times;</button>
+          </div>
+          <form action="/admin/rooms/allot" method="POST">
+            <div class="modal-body">
+              <div class="form-group">
+                <label class="form-label" for="allotStudentId">Select Unallotted Student *</label>
+                <select name="studentId" id="allotStudentId" class="form-select" required>
+                  <option value="" disabled selected>-- Choose Student --</option>
+                  <% unallottedStudents.forEach(function(st) { %>
+                    <option value="<%= st._id %>"><%= st.name %> (<%= st.studentId || 'No ID' %>) - <%= st.email %></option>
+                  <% }); %>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="allotRoomId">Select Target Room (With Available Beds) *</label>
+                <select name="roomId" id="allotRoomId" class="form-select" required>
+                  <option value="" disabled selected>-- Choose Room --</option>
+                  <% rooms.filter(r => r.occupiedBeds < r.capacity && r.status !== 'Maintenance').forEach(function(r) { %>
+                    <option value="<%= r._id %>">
+                      Room <%= r.roomNumber %> &bull; <%= r.block ? r.block.name : '' %> (<%= r.capacity - r.occupiedBeds %> beds free)
+                    </option>
+                  <% }); %>
+                </select>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary btn-sm" data-modal-close>Cancel</button>
+              <button type="submit" class="btn btn-success btn-sm">Allot Bed Immediately</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

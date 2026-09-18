@@ -1,0 +1,20 @@
+<%- include('../partials/header') %>
+
+<div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: radial-gradient(circle at top, #eef2ff 0%, #f8fafc 80%); padding: 2rem 1rem;">
+  <div class="card" style="max-width: 480px; width: 100%; text-align: center; padding: 2.5rem; box-shadow: var(--shadow-lg);">
+    <div style="width: 72px; height: 72px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 2rem; margin: 0 auto 1.5rem auto;">
+      <i class="fa-solid fa-compass"></i>
+    </div>
+    <h1 style="font-size: 3rem; font-weight: 800; color: var(--slate-900); line-height: 1;">404</h1>
+    <h3 style="margin: 0.75rem 0 0.5rem 0; font-size: 1.25rem;">Page Not Found</h3>
+    <p style="color: var(--slate-500); font-size: 0.9rem; margin-bottom: 2rem;">
+      The page or hostel record you requested could not be located or may have been moved.
+    </p>
+    <div style="display: flex; gap: 0.75rem; justify-content: center;">
+      <a href="/" class="btn btn-outline btn-sm"><i class="fa-solid fa-house"></i> Home</a>
+      <a href="/login" class="btn btn-primary btn-sm"><i class="fa-solid fa-arrow-right-to-bracket"></i> Login</a>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,161 @@
+<%- include('../partials/header') %>
+
+<div class="app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <div class="app-main">
+    <%- include('../partials/topbar') %>
+
+    <main class="app-content">
+      <%- include('../partials/flash') %>
+
+      <div class="page-header">
+        <div class="page-header-info">
+          <h1>Maintenance Ticketing System</h1>
+          <p>Track reported facility breakdowns, assign priority levels, and log work order resolutions</p>
+        </div>
+      </div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <form action="/admin/maintenance" method="GET" class="filter-form">
+          <select name="status" class="form-select" style="max-width: 170px;">
+            <option value="all" <%= filters.status === 'all' ? 'selected' : '' %>>All Statuses</option>
+            <option value="Pending" <%= filters.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+            <option value="In Progress" <%= filters.status === 'In Progress' ? 'selected' : '' %>>In Progress</option>
+            <option value="Resolved" <%= filters.status === 'Resolved' ? 'selected' : '' %>>Resolved</option>
+            <option value="Rejected" <%= filters.status === 'Rejected' ? 'selected' : '' %>>Rejected</option>
+          </select>
+
+          <select name="priority" class="form-select" style="max-width: 170px;">
+            <option value="all" <%= filters.priority === 'all' ? 'selected' : '' %>>All Priorities</option>
+            <option value="Urgent" <%= filters.priority === 'Urgent' ? 'selected' : '' %>>Urgent</option>
+            <option value="High" <%= filters.priority === 'High' ? 'selected' : '' %>>High</option>
+            <option value="Medium" <%= filters.priority === 'Medium' ? 'selected' : '' %>>Medium</option>
+            <option value="Low" <%= filters.priority === 'Low' ? 'selected' : '' %>>Low</option>
+          </select>
+
+          <select name="category" class="form-select" style="max-width: 170px;">
+            <option value="all" <%= filters.category === 'all' ? 'selected' : '' %>>All Categories</option>
+            <option value="Electrical" <%= filters.category === 'Electrical' ? 'selected' : '' %>>Electrical</option>
+            <option value="Plumbing" <%= filters.category === 'Plumbing' ? 'selected' : '' %>>Plumbing</option>
+            <option value="Furniture" <%= filters.category === 'Furniture' ? 'selected' : '' %>>Furniture</option>
+            <option value="Cleaning" <%= filters.category === 'Cleaning' ? 'selected' : '' %>>Cleaning</option>
+            <option value="Internet" <%= filters.category === 'Internet' ? 'selected' : '' %>>Internet</option>
+            <option value="Other" <%= filters.category === 'Other' ? 'selected' : '' %>>Other</option>
+          </select>
+
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="fa-solid fa-filter"></i> Filter
+          </button>
+          <a href="/admin/maintenance" class="btn btn-secondary btn-sm">Reset</a>
+        </form>
+      </div>
+
+      <!-- Tickets Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fa-solid fa-screwdriver-wrench" style="color: var(--primary);"></i> Tickets (<%= requests.length %>)</h3>
+        </div>
+        <div class="table-container">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Student</th>
+                <th>Room</th>
+                <th>Category</th>
+                <th>Priority</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (requests && requests.length > 0) { %>
+                <% requests.forEach(function(t) { %>
+                  <tr>
+                    <td><%= new Date(t.createdAt).toLocaleDateString() %></td>
+                    <td>
+                      <strong><%= t.student ? t.student.name : 'Unknown' %></strong>
+                      <div style="font-size: 0.75rem; color: var(--slate-500);"><%= t.student ? t.student.phone : '' %></div>
+                    </td>
+                    <td>
+                      <strong>Room <%= t.room ? t.room.roomNumber : 'N/A' %></strong>
+                      <div style="font-size: 0.75rem; color: var(--slate-500);"><%= t.room && t.room.block ? t.room.block.name : '' %></div>
+                    </td>
+                    <td><strong><%= t.category %></strong></td>
+                    <td>
+                      <span class="badge <%= t.priority === 'Urgent' ? 'badge-full' : t.priority === 'High' ? 'badge-pending' : 'badge-maintenance' %>">
+                        <%= t.priority %>
+                      </span>
+                    </td>
+                    <td><%= t.description %></td>
+                    <td>
+                      <span class="badge <%= t.status === 'Resolved' ? 'badge-resolved' : t.status === 'In Progress' ? 'badge-in-progress' : t.status === 'Rejected' ? 'badge-rejected' : 'badge-pending' %>">
+                        <%= t.status %>
+                      </span>
+                      <% if (t.adminRemarks) { %>
+                        <div style="font-size: 0.7rem; color: var(--slate-500); margin-top: 0.2rem;"><%= t.adminRemarks %></div>
+                      <% } %>
+                    </td>
+                    <td>
+                      <button type="button" class="btn btn-outline btn-sm" data-modal-target="#statusModal-<%= t._id %>" style="padding: 0.3rem 0.6rem; font-size: 0.75rem;">
+                        <i class="fa-solid fa-pen-to-square"></i> Update
+                      </button>
+
+                      <!-- Update Status Modal -->
+                      <div class="modal-backdrop" id="statusModal-<%= t._id %>">
+                        <div class="modal-dialog">
+                          <div class="modal-header">
+                            <h4>Update Ticket: <%= t.category %></h4>
+                            <button type="button" class="modal-close" data-modal-close>&times;</button>
+                          </div>
+                          <form action="/admin/maintenance/<%= t._id %>" method="POST">
+                            <div class="modal-body">
+                              <p style="font-size: 0.85rem; color: var(--slate-600); margin-bottom: 1rem;">
+                                Room <%= t.room ? t.room.roomNumber : '' %> &bull; Student: <%= t.student ? t.student.name : '' %><br>
+                                Issue: "<%= t.description %>"
+                              </p>
+
+                              <div class="form-group">
+                                <label class="form-label">Update Status *</label>
+                                <select name="status" class="form-select" required>
+                                  <option value="Pending" <%= t.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                  <option value="In Progress" <%= t.status === 'In Progress' ? 'selected' : '' %>>In Progress (Technician Dispatched)</option>
+                                  <option value="Resolved" <%= t.status === 'Resolved' ? 'selected' : '' %>>Resolved (Work Completed)</option>
+                                  <option value="Rejected" <%= t.status === 'Rejected' ? 'selected' : '' %>>Rejected</option>
+                                </select>
+                              </div>
+
+                              <div class="form-group">
+                                <label class="form-label">Warden Remarks / Resolution Notes</label>
+                                <textarea name="adminRemarks" class="form-control" placeholder="E.g., Electrician replaced tube light fixture on 19th Sep..."><%= t.adminRemarks || '' %></textarea>
+                              </div>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary btn-sm" data-modal-close>Cancel</button>
+                              <button type="submit" class="btn btn-primary btn-sm">Save Ticket Status</button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                <% }); %>
+              <% } else { %>
+                <tr>
+                  <td colspan="8" style="text-align: center; color: var(--slate-400); padding: 3rem;">
+                    No maintenance tickets match the selected filter.
+                  </td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

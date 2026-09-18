@@ -1,0 +1,143 @@
+<%- include('../partials/header') %>
+
+<div style="min-height: 100vh; display: flex; flex-direction: column;">
+  <!-- Public Top Navigation -->
+  <nav style="background: var(--white); border-bottom: 1px solid var(--slate-200); padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50;">
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <div style="width: 36px; height: 36px; border-radius: var(--radius-md); background: linear-gradient(135deg, var(--primary), var(--secondary)); display: flex; align-items: center; justify-content: center; color: white;">
+        <i class="fa-solid fa-hotel"></i>
+      </div>
+      <div>
+        <h3 style="font-size: 1.15rem; color: var(--slate-900);">CampusNest</h3>
+        <span style="font-size: 0.72rem; color: var(--slate-500); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;">Hostel & Mess Management</span>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <a href="/about" class="btn btn-outline btn-sm">
+        <i class="fa-solid fa-circle-info"></i> Guidelines & About
+      </a>
+      <% if (currentUser) { %>
+        <a href="<%= currentUser.role === 'admin' ? '/admin/dashboard' : '/student/dashboard' %>" class="btn btn-primary btn-sm">
+          <i class="fa-solid fa-gauge"></i> Go to Dashboard
+        </a>
+      <% } else { %>
+        <a href="/login" class="btn btn-outline btn-sm">
+          <i class="fa-solid fa-arrow-right-to-bracket"></i> Login
+        </a>
+        <a href="/register" class="btn btn-primary btn-sm">
+          <i class="fa-solid fa-user-plus"></i> Register
+        </a>
+      <% } %>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="landing-hero">
+    <div class="landing-badge">
+      <i class="fa-solid fa-sparkles"></i> Next-Generation College Hostel Platform
+    </div>
+    <h1>Effortless Room Allotment & Mess Management</h1>
+    <p>
+      An all-in-one system designed for college hostels. Real-time room vacancy tracking, 
+      smart room transfer workflows, weekly mess timetables, and transparent billing.
+    </p>
+
+    <div class="landing-cta-group">
+      <a href="/login" class="btn btn-primary btn-lg">
+        <i class="fa-solid fa-right-to-bracket"></i> Access Student & Warden Portal
+      </a>
+      <a href="/register" class="btn btn-secondary btn-lg">
+        <i class="fa-solid fa-user-plus"></i> Register as New Resident
+      </a>
+    </div>
+
+    <!-- Live Statistics Counter -->
+    <div style="display: flex; justify-content: center; gap: 2rem; margin-top: 3.5rem; flex-wrap: wrap;">
+      <div style="background: var(--white); border: 1px solid var(--slate-200); padding: 1.25rem 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); min-width: 150px;">
+        <div style="font-size: 2rem; font-weight: 800; color: var(--primary);"><%= stats.totalBlocks %></div>
+        <div style="font-size: 0.825rem; color: var(--slate-500); text-transform: uppercase; font-weight: 600;">Hostel Blocks</div>
+      </div>
+      <div style="background: var(--white); border: 1px solid var(--slate-200); padding: 1.25rem 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); min-width: 150px;">
+        <div style="font-size: 2rem; font-weight: 800; color: var(--secondary);"><%= stats.totalRooms %></div>
+        <div style="font-size: 0.825rem; color: var(--slate-500); text-transform: uppercase; font-weight: 600;">Total Rooms</div>
+      </div>
+      <div style="background: var(--white); border: 1px solid var(--slate-200); padding: 1.25rem 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); min-width: 150px;">
+        <div style="font-size: 2rem; font-weight: 800; color: var(--success);"><%= stats.totalBeds %></div>
+        <div style="font-size: 0.825rem; color: var(--slate-500); text-transform: uppercase; font-weight: 600;">Total Bed Capacity</div>
+      </div>
+      <div style="background: var(--white); border: 1px solid var(--slate-200); padding: 1.25rem 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); min-width: 150px;">
+        <div style="font-size: 2rem; font-weight: 800; color: var(--warning);"><%= stats.availableBeds %></div>
+        <div style="font-size: 0.825rem; color: var(--slate-500); text-transform: uppercase; font-weight: 600;">Vacant Beds Available</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Core Features Grid -->
+  <section class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon-box">
+        <i class="fa-solid fa-bed"></i>
+      </div>
+      <h3>Smart Room Allocation</h3>
+      <p>Automated capacity enforcement prevents over-allocation. Real-time availability by single, double, triple, and 4-sharing configurations.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon-box" style="background: var(--success-light); color: var(--success);">
+        <i class="fa-solid fa-utensils"></i>
+      </div>
+      <h3>Weekly Mess Timetable</h3>
+      <p>Live 7-day dining schedule with breakfast, lunch, snacks, and dinner. Automatic current-day highlight keeps residents updated.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon-box" style="background: var(--warning-light); color: var(--warning);">
+        <i class="fa-solid fa-star-half-stroke"></i>
+      </div>
+      <h3>Meal Ratings & Feedback</h3>
+      <p>Submit reviews and 1-5 star ratings for each meal. Wardens monitor dining quality trends and average satisfaction analytics.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon-box" style="background: var(--info-light); color: var(--info);">
+        <i class="fa-solid fa-screwdriver-wrench"></i>
+      </div>
+      <h3>Maintenance Ticketing</h3>
+      <p>Raise electrical, plumbing, furniture, and internet complaints with priority flags. Wardens track tickets through resolution.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon-box" style="background: #fdf2f8; color: #db2777;">
+        <i class="fa-solid fa-arrow-right-arrow-left"></i>
+      </div>
+      <h3>Room Transfer System</h3>
+      <p>Request transfers to available rooms with verified reason logs. Atomic bed vacancy and occupancy updates maintain integrity.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon-box" style="background: var(--slate-100); color: var(--slate-700);">
+        <i class="fa-solid fa-file-invoice-dollar"></i>
+      </div>
+      <h3>Monthly Mess Billing</h3>
+      <p>Automated invoices calculated based on student meal attendance records and daily rates with instant payment status tracking.</p>
+    </div>
+  </section>
+
+  <!-- Public Footer -->
+  <footer style="margin-top: auto; background: var(--slate-900); color: var(--slate-400); padding: 2.5rem 2rem; text-align: center; border-top: 1px solid var(--slate-800);">
+    <div style="max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+      <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--white); font-weight: 700; font-size: 1.1rem;">
+        <i class="fa-solid fa-hotel" style="color: var(--secondary);"></i> CampusNest
+      </div>
+      <p style="font-size: 0.85rem; max-width: 500px;">
+        College Hostel Room Allotment & Mess Management Platform. Designed for students, wardens, and administrative staff.
+      </p>
+      <div style="font-size: 0.75rem; color: var(--slate-500); margin-top: 1rem;">
+        &copy; <%= new Date().getFullYear() %> CampusNest System. All rights reserved.
+      </div>
+    </div>
+  </footer>
+</div>
+
+<%- include('../partials/footer') %>

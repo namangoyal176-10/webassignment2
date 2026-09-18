@@ -1,0 +1,91 @@
+<%- include('../partials/header') %>
+
+<div class="app-wrapper">
+  <%- include('../partials/sidebar') %>
+
+  <div class="app-main">
+    <%- include('../partials/topbar') %>
+
+    <main class="app-content">
+      <%- include('../partials/flash') %>
+
+      <div class="page-header">
+        <div class="page-header-info">
+          <h1>Weekly Mess Timetable</h1>
+          <p>Official 7-day dining schedule curated by the hostel mess committee</p>
+        </div>
+        <div class="page-actions">
+          <a href="/student/feedback" class="btn btn-primary btn-sm">
+            <i class="fa-solid fa-star"></i> Submit Meal Feedback
+          </a>
+        </div>
+      </div>
+
+      <!-- Current Day Indicator Alert -->
+      <div class="alert alert-success" style="margin-bottom: 2rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <i class="fa-solid fa-bell"></i>
+          <div>
+            <strong>Today is <%= dayNames[currentDay] || 'Today' %>:</strong> The active day's menu is highlighted below with today's dining options.
+          </div>
+        </div>
+      </div>
+
+      <!-- 7-Day Grid -->
+      <div class="mess-schedule-grid">
+        <% days.forEach(function(dayKey) { %>
+          <% const isToday = dayKey === currentDay; %>
+          <% const dayMenu = menu ? menu[dayKey] : null; %>
+          <div class="day-menu-card <%= isToday ? 'active-day' : '' %>">
+            <div class="day-menu-header">
+              <h4 style="font-size: 1.1rem; text-transform: capitalize;"><%= dayNames[dayKey] %></h4>
+              <% if (isToday) { %>
+                <span class="badge" style="background: var(--white); color: var(--primary); font-weight: 700;">TODAY</span>
+              <% } %>
+            </div>
+
+            <div class="day-menu-body">
+              <div class="meal-slot">
+                <div class="meal-slot-label">
+                  <i class="fa-solid fa-sun" style="color: #f59e0b;"></i> Breakfast
+                </div>
+                <div class="meal-slot-content">
+                  <%= dayMenu ? dayMenu.breakfast : 'Not specified' %>
+                </div>
+              </div>
+
+              <div class="meal-slot">
+                <div class="meal-slot-label">
+                  <i class="fa-solid fa-utensils" style="color: #10b981;"></i> Lunch
+                </div>
+                <div class="meal-slot-content">
+                  <%= dayMenu ? dayMenu.lunch : 'Not specified' %>
+                </div>
+              </div>
+
+              <div class="meal-slot">
+                <div class="meal-slot-label">
+                  <i class="fa-solid fa-mug-hot" style="color: #ea580c;"></i> Evening Snacks
+                </div>
+                <div class="meal-slot-content">
+                  <%= dayMenu ? dayMenu.snacks : 'Not specified' %>
+                </div>
+              </div>
+
+              <div class="meal-slot">
+                <div class="meal-slot-label">
+                  <i class="fa-solid fa-moon" style="color: #6366f1;"></i> Dinner
+                </div>
+                <div class="meal-slot-content">
+                  <%= dayMenu ? dayMenu.dinner : 'Not specified' %>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    </main>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

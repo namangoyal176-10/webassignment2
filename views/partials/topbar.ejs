@@ -1,0 +1,28 @@
+<header class="app-topbar">
+  <div class="topbar-left">
+    <button type="button" class="menu-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle navigation menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <div class="topbar-title">
+      <h2><%= typeof pageTitle !== 'undefined' ? pageTitle : 'Hostel Portal' %></h2>
+    </div>
+  </div>
+
+  <div class="topbar-right">
+    <a href="/" target="_blank" class="topbar-link" title="Visit Public Landing Page">
+      <i class="fa-solid fa-arrow-up-right-from-square"></i> Portal Home
+    </a>
+
+    <% if (currentUser) { %>
+      <div style="display: flex; align-items: center; gap: 0.75rem; border-left: 1px solid var(--slate-200); padding-left: 1rem;">
+        <span class="badge <%= currentUser.role === 'admin' ? 'badge-partially-occupied' : 'badge-available' %>">
+          <i class="fa-solid <%= currentUser.role === 'admin' ? 'fa-shield-halved' : 'fa-graduation-cap' %>"></i>
+          <%= currentUser.role === 'admin' ? 'Warden Admin' : 'Student' %>
+        </span>
+        <span style="font-size: 0.85rem; font-weight: 600; color: var(--slate-700);">
+          <%= currentUser.name %>
+        </span>
+      </div>
+    <% } %>
+  </div>
+</header>

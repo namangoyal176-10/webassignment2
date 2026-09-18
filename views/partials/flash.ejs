@@ -1,0 +1,9 @@
+<% if (typeof flash !== 'undefined' && flash && flash.message) { %>
+  <div class="alert alert-<%= flash.type || 'info' %>">
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <i class="fa-solid <%= flash.type === 'success' ? 'fa-circle-check' : flash.type === 'danger' ? 'fa-circle-exclamation' : 'fa-circle-info' %>"></i>
+      <span><%= flash.message %></span>
+    </div>
+    <button type="button" class="alert-close" aria-label="Close alert">&times;</button>
+  </div>
+<% } %>
