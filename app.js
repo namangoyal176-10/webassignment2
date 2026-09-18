@@ -51,17 +51,34 @@ app.set('view engine', 'ejs');
 
 // Session configuration with MongoDB session store
 const mongoUrl = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/hostel_db';
+const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_VERSION);
+const isLocalUri = mongoUrl.includes('127.0.0.1') || mongoUrl.includes('localhost');
+
+let sessionStore = undefined;
+if (!isServerless || !isLocalUri) {
+  try {
+    sessionStore = MongoStore.create({
+      mongoUrl,
+      collectionName: 'sessions',
+      ttl: 7 * 24 * 60 * 60, // 7 days
+      autoRemove: 'native',
+      touchAfter: 24 * 3600,
+    });
+    sessionStore.on('error', (err) => {
+      console.warn('[Session Store Warning]:', err.message);
+    });
+  } catch (err) {
+    console.warn('[Session] MongoStore initialization skipped, using memory store:', err.message);
+    sessionStore = undefined;
+  }
+}
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || 'hostel_secret_key_default_998877',
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({
-      mongoUrl,
-      collectionName: 'sessions',
-      ttl: 7 * 24 * 60 * 60, // 7 days
-      autoRemove: 'native',
-    }),
+    store: sessionStore,
     cookie: {
       httpOnly: true,
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days

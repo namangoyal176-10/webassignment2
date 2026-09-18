@@ -12,6 +12,14 @@ if (!cached) {
  */
 async function connectDB() {
   const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/hostel_db';
+  const isServerless = Boolean(process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_VERSION);
+  const isLocalUri = MONGODB_URI.includes('127.0.0.1') || MONGODB_URI.includes('localhost');
+
+  // When deployed on Vercel without a cloud MongoDB Atlas URI, skip local connection
+  if (isServerless && isLocalUri) {
+    console.warn('[MongoDB] Running on Vercel with localhost URI. MongoDB Atlas URI (mongodb+srv://...) required for cloud persistence.');
+    return null;
+  }
 
   if (cached.conn) {
     return cached.conn;
@@ -19,9 +27,9 @@ async function connectDB() {
 
   if (!cached.promise) {
     const opts = {
-      bufferCommands: true,
+      bufferCommands: false,
       maxPoolSize: 10,
-      serverSelectionTimeoutMS: 10000,
+      serverSelectionTimeoutMS: 5000,
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongooseInstance) => {
@@ -30,7 +38,7 @@ async function connectDB() {
     }).catch((err) => {
       cached.promise = null;
       console.error('[MongoDB] Connection error:', err.message);
-      throw err;
+      return null;
     });
   }
 
@@ -38,10 +46,12 @@ async function connectDB() {
     cached.conn = await cached.promise;
   } catch (e) {
     cached.promise = null;
-    throw e;
+    console.error('[MongoDB] Connection failed:', e.message);
+    return null;
   }
 
   return cached.conn;
 }
 
 module.exports = connectDB;
+

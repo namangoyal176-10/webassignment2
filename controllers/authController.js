@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const mongoose = require('mongoose');
 
 /**
  * Render Login Page
@@ -14,6 +15,14 @@ exports.getLogin = (req, res) => {
  */
 exports.postLogin = async (req, res) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      req.session.flash = {
+        type: 'warning',
+        message: 'Cloud database connection is pending. Please configure your MongoDB Atlas MONGODB_URI in Vercel.',
+      };
+      return res.redirect('/login');
+    }
+
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -80,6 +89,14 @@ exports.getRegister = (req, res) => {
  */
 exports.postRegister = async (req, res) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      req.session.flash = {
+        type: 'warning',
+        message: 'Cloud database connection is pending. Please configure your MongoDB Atlas MONGODB_URI in Vercel.',
+      };
+      return res.redirect('/register');
+    }
+
     const { name, email, studentId, phone, password, confirmPassword } = req.body;
 
     // Validation
