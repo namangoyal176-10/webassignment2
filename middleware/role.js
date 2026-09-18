@@ -8,13 +8,15 @@ function requireAdmin(req, res, next) {
     return next();
   }
 
-  if (req.session) {
+  if (req.session && req.session.role === 'student') {
     req.session.flash = {
       type: 'danger',
       message: 'Access denied: Admin privileges required.',
     };
+    return res.redirect(303, '/student/dashboard');
   }
-  return res.redirect('/student/dashboard');
+
+  return res.redirect(303, '/login');
 }
 
 /**
@@ -26,7 +28,7 @@ function requireStudent(req, res, next) {
   }
 
   if (req.session && req.session.role === 'admin') {
-    return res.redirect('/admin/dashboard');
+    return res.redirect(303, '/admin/dashboard');
   }
 
   if (req.session) {
@@ -35,7 +37,7 @@ function requireStudent(req, res, next) {
       message: 'Access denied: Student access only.',
     };
   }
-  return res.redirect('/login');
+  return res.redirect(303, '/login');
 }
 
 /**

@@ -7,3 +7,14 @@
     <button type="button" class="alert-close" aria-label="Close alert">&times;</button>
   </div>
 <% } %>
+
+<% if (typeof error !== 'undefined' && error) { %>
+  <div class="alert alert-danger">
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <span><%= error %></span>
+    </div>
+    <button type="button" class="alert-close" aria-label="Close alert">&times;</button>
+  </div>
+<% } %>
+

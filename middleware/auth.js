@@ -12,7 +12,7 @@ function isAuthenticated(req, res, next) {
       message: 'Please log in to access this page.',
     };
   }
-  return res.redirect('/login');
+  return res.redirect(303, '/login');
 }
 
 /**
@@ -21,9 +21,15 @@ function isAuthenticated(req, res, next) {
 function isGuest(req, res, next) {
   if (req.session && req.session.userId) {
     if (req.session.role === 'admin') {
-      return res.redirect('/admin/dashboard');
+      return res.redirect(303, '/admin/dashboard');
     }
-    return res.redirect('/student/dashboard');
+    if (req.session.role === 'student') {
+      return res.redirect(303, '/student/dashboard');
+    }
+    // Corrupted or incomplete session
+    delete req.session.userId;
+    delete req.session.role;
+    return next();
   }
   return next();
 }
