@@ -43,9 +43,10 @@ app.use(methodOverride('_method'));
 
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(process.cwd(), 'public')));
 
 // EJS View Engine setup
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', [path.join(__dirname, 'views'), path.join(process.cwd(), 'views')]);
 app.set('view engine', 'ejs');
 
 // Session configuration with MongoDB session store
