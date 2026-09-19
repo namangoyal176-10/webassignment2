@@ -1,6 +1,14 @@
 # CampusNest — Hostel Room Allotment & Mess Management System
 
-CampusNest is a complete, production-grade full-stack web application designed for university and college hostel administration. Built strictly with **Node.js, Express.js, MongoDB (Mongoose), EJS, and Vanilla CSS3/JavaScript**, the system manages room capacity enforcement, transfer workflows, facility maintenance tickets, weekly mess menus, student meal feedback, meal attendance, and automated monthly billing.
+> **🌐 Live Deployment:** [https://webassignment2-peach.vercel.app](https://webassignment2-peach.vercel.app)  
+> **📂 GitHub Repository:** [https://github.com/namangoyal176-10/webassignment2](https://github.com/namangoyal176-10/webassignment2)
+
+---
+
+### 🔑 Live Evaluation Credentials
+* **Warden / Admin:** `admin@hostel.com` &bull; Password: `Admin@1234`
+* **Resident Student:** `aarav.sharma@hostel.edu` &bull; Password: `student123`  
+*(One-click demo credentials fill buttons are also available on the Login page)*
 
 ---
 
