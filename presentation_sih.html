@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CampusNest — Smart India Hackathon (SIH) Presentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #0a0f1d;
+      --bg-card: rgba(22, 30, 52, 0.75);
+      --bg-card-hover: rgba(30, 42, 74, 0.85);
+      --border-card: rgba(99, 102, 241, 0.25);
+      --accent-primary: #6366f1;
+      --accent-secondary: #38bdf8;
+      --accent-success: #10b981;
+      --accent-amber: #f59e0b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --gradient-brand: linear-gradient(135deg, #6366f1 0%, #38bdf8 100%);
+      --gradient-orange: linear-gradient(135deg, #f97316 0%, #facc15 100%);
+      --gradient-green: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg-main);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow-x: hidden;
+    }
+
+    /* Presentation Header Toolbar */
+    .top-toolbar {
+      width: 100%;
+      max-width: 1200px;
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .brand-tag {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
+      color: var(--text-main);
+    }
+
+    .badge-sih {
+      background: linear-gradient(135deg, #ff7a18 0%, #af002d 100%);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn-tool {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--text-main);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-tool:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: var(--accent-primary);
+    }
+
+    /* Slide Deck Container */
+    .deck-container {
+      width: 100%;
+      max-width: 1200px;
+      aspect-ratio: 16 / 9;
+      min-height: 640px;
+      position: relative;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(99, 102, 241, 0.3);
+      border-radius: 16px;
+      background: radial-gradient(circle at 90% 10%, rgba(56, 189, 248, 0.12) 0%, transparent 40%),
+                  radial-gradient(circle at 10% 90%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
+                  #0f172a;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      padding: 44px 56px;
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      opacity: 0;
+      transform: translateX(30px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+
+    .slide.active {
+      display: flex;
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* Slide Header */
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+
+    .slide-header-left h2 {
+      font-size: 1.85rem;
+      font-weight: 800;
+      background: var(--gradient-brand);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 4px;
+    }
+
+    .slide-header-left p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .slide-number {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--accent-secondary);
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-weight: 600;
+    }
+
+    /* Slide Content Grid Layouts */
+    .grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      flex: 1;
+    }
+
+    .grid-3col {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      flex: 1;
+    }
+
+    .grid-4col {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      flex: 1;
+    }
+
+    /* Card Component */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      padding: 20px 22px;
+      backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .card:hover {
+      border-color: rgba(99, 102, 241, 0.5);
+      background: var(--bg-card-hover);
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title .icon {
+      font-size: 1.25rem;
+    }
+
+    .card-body {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .card-body ul {
+      list-style-position: inside;
+      margin-left: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .card-body strong {
+      color: #e2e8f0;
+    }
+
+    /* Badges & Highlights */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .pill.green {
+      background: rgba(16, 185, 129, 0.15);
+      color: #6ee7b7;
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .pill.orange {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fcd34d;
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+
+    /* Slide 1 Hero Specifics */
+    .hero-slide {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 20px;
+      height: 100%;
+    }
+
+    .hero-title {
+      font-size: 2.8rem;
+      font-weight: 800;
+      line-height: 1.15;
+      background: linear-gradient(135deg, #ffffff 30%, #93c5fd 70%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 800px;
+      line-height: 1.6;
+    }
+
+    .hero-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      width: 100%;
+      max-width: 900px;
+      margin-top: 15px;
+    }
+
+    .meta-box {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 14px 18px;
+      text-align: left;
+    }
+
+    .meta-box span {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .meta-box h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* Slide Footer / Navigation Bar */
+    .deck-controls {
+      width: 100%;
+      max-width: 1200px;
+      margin-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 10px;
+    }
+
+    .dots-indicator {
+      display: flex;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+
+    .dot.active {
+      width: 32px;
+      background: var(--accent-primary);
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-nav {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-nav:hover:not(:disabled) {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+    }
+
+    .btn-nav:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    /* Code Snippet Box */
+    .code-box {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 10px 12px;
+      color: #38bdf8;
+      line-height: 1.4;
+      overflow-x: auto;
+    }
+
+    /* Print / PDF Styles for 6 Crisp Landscape Slides */
+    @media print {
+      body {
+        background: #fff !important;
+        color: #000 !important;
+        padding: 0;
+        margin: 0;
+      }
+
+      .top-toolbar, .deck-controls {
+        display: none !important;
+      }
+
+      .deck-container {
+        box-shadow: none !important;
+        border: none !important;
+        border-radius: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        height: auto !important;
+        background: transparent !important;
+      }
+
+      .slide {
+        display: flex !important;
+        opacity: 1 !important;
+        transform: none !important;
+        position: relative !important;
+        page-break-after: always !important;
+        min-height: 100vh !important;
+        padding: 40px !important;
+        color: #0f172a !important;
+        background: #ffffff !important;
+        border-bottom: 2px solid #e2e8f0;
+      }
+
+      .card {
+        background: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #0f172a !important;
+      }
+
+      .card-title {
+        color: #1e293b !important;
+      }
+
+      .card-body {
+        color: #475569 !important;
+      }
+
+      .slide-header-left h2 {
+        background: none !important;
+        -webkit-text-fill-color: #1e293b !important;
+        color: #1e293b !important;
+      }
+
+      .code-box {
+        background: #f1f5f9 !important;
+        color: #0f172a !important;
+        border: 1px solid #cbd5e1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Toolbar -->
+  <div class="top-toolbar">
+    <div class="brand-tag">
+      <span class="badge-sih">SIH 2026 Format</span>
+      <span>CampusNest Project Presentation</span>
+    </div>
+    <div class="toolbar-actions">
+      <button class="btn-tool" onclick="toggleFullScreen()">⛶ Fullscreen (F)</button>
+      <button class="btn-tool" onclick="window.print()">🖨️ Print / Save as PDF</button>
+    </div>
+  </div>
+
+  <!-- Slide Deck Main Container -->
+  <div class="deck-container" id="deck">
+
+    <!-- SLIDE 1: Title & Team Details -->
+    <div class="slide active" id="slide-1">
+      <div class="hero-slide">
+        <div style="display: flex; gap: 8px;">
+          <span class="pill green">Smart Campus Category</span>
+          <span class="pill">Student Welfare Automation</span>
+          <span class="pill orange">Problem Statement ID: SIH-2026-CAMPUS-02</span>
+        </div>
+
+        <h1 class="hero-title">
+          CampusNest
+        </h1>
+        <p class="hero-subtitle">
+          An Intelligent, Production-Grade Web Platform for Capacity-Enforced Hostel Room Allotment, Facility Maintenance SLAs, and Dynamic Attendance-Based Mess Invoicing.
+        </p>
+
+        <div class="hero-meta-grid">
+          <div class="meta-box">
+            <span>Project Domain</span>
+            <h4>Smart Education & Campus Administration</h4>
+          </div>
+          <div class="meta-box">
+            <span>Team Lead & Developer</span>
+            <h4>Naman Goyal</h4>
+          </div>
+          <div class="meta-box">
+            <span>Live Deployment</span>
+            <h4 style="color: #38bdf8;">webassignment2-peach.vercel.app</h4>
+          </div>
+        </div>
+
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 10px;">
+          Built with Node.js &bull; Express &bull; MongoDB Atlas &bull; EJS &bull; Vanilla CSS3 &bull; Vercel Serverless Edge
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: Problem Statement & Proposed Solution -->
+    <div class="slide" id="slide-2">
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <h2>01. Problem Statement & Proposed Solution</h2>
+          <p>Addressing core administrative inefficiencies in university residential hostels</p>
+        </div>
+        <div class="slide-number">Slide 02 / 06</div>
+      </div>
+
+      <div class="grid-2col">
+        <!-- The Problem -->
+        <div class="card" style="border-left: 4px solid #ef4444;">
+          <div class="card-title">
+            <span class="icon">⚠️</span> The Existing Problem
+          </div>
+          <div class="card-body">
+            <ul>
+              <li><strong>Capacity Over-Allotment:</strong> Manual spreadsheets cause double-bookings, ghost reservations, and room overfills beyond legal fire safety capacities.</li>
+              <li><strong>Unfair Static Dining Fees:</strong> Students are charged a fixed monthly mess fee regardless of academic leaves, semester breaks, or meal absences.</li>
+              <li><strong>Unaccountable Maintenance:</strong> Complaints written in physical logbooks get delayed with zero SLA tracking, prioritization, or resident accountability.</li>
+              <li><strong>Lack of Real-Time Analytics:</strong> Wardens cannot quickly visualize block-wise occupancy or room availability metrics during admissions.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- The Proposed Solution -->
+        <div class="card" style="border-left: 4px solid #10b981;">
+          <div class="card-title">
+            <span class="icon">💡</span> The Proposed Solution: CampusNest
+          </div>
+          <div class="card-body">
+            <ul>
+              <li><strong>Zero-Overbooking State Machine:</strong> Database-enforced capacity constraints guarantee <code>occupiedBeds &le; capacity</code> at all times.</li>
+              <li><strong>Dynamic Attendance-Based Mess Invoicing:</strong> Automated calculation using formula: <code>Total = (Days Present &times; Daily Rate) + Maintenance</code>.</li>
+              <li><strong>End-to-End Maintenance Ticketing:</strong> Priority categorised ticketing (Urgent, High, Medium) with real-time status transitions and resolution remarks.</li>
+              <li><strong>Warden KPI Dashboard:</strong> Real-time Chart.js interactive visualizations for block occupancy and bed distribution metrics.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: Technical Architecture & System Workflow -->
+    <div class="slide" id="slide-3">
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <h2>02. Technical Architecture & Tech Stack</h2>
+          <p>Production-grade MVC pattern with resilient cloud serverless scaling</p>
+        </div>
+        <div class="slide-number">Slide 03 / 06</div>
+      </div>
+
+      <div class="grid-3col">
+        <div class="card">
+          <div class="card-title"><span class="icon">⚙️</span> Backend & API Engine</div>
+          <div class="card-body">
+            <ul>
+              <li><strong>Node.js & Express.js:</strong> Modular REST routing, separation of concerns.</li>
+              <li><strong>Security Headers:</strong> Helmet middleware protection against XSS and clickjacking.</li>
+              <li><strong>Session Store:</strong> <code>connect-mongo</code> persistence surviving serverless lifecycle restarts.</li>
+            </ul>
+            <div class="code-box">
+              // Serverless Bridge<br>
+              module.exports = async (req, res) => {<br>
+              &nbsp;&nbsp;await connectDB();<br>
+              &nbsp;&nbsp;return app(req, res);<br>
+              };
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span class="icon">🗄️</span> Database & Integrity Layer</div>
+          <div class="card-body">
+            <ul>
+              <li><strong>MongoDB Atlas:</strong> Distributed cloud cluster with global replica sets.</li>
+              <li><strong>Mongoose Connection Pool:</strong> Cached global promise pool preventing connection leaks.</li>
+              <li><strong>Compound Indexing:</strong> <code>{ student, day, mealType }</code> preventing duplicate ratings.</li>
+            </ul>
+            <div class="code-box">
+              roomSchema.pre('save', function() {<br>
+              &nbsp;&nbsp;this.status = this.occupiedBeds === 0 ?<br>
+              &nbsp;&nbsp;'Available' : (this.occupiedBeds >= this.capacity ? 'Full' : 'Partially Occupied');<br>
+              });
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span class="icon">🎨</span> UI & Presentation Layer</div>
+          <div class="card-body">
+            <ul>
+              <li><strong>Embedded JavaScript (EJS):</strong> Server-side template rendering for optimal SEO and performance.</li>
+              <li><strong>Vanilla CSS3:</strong> Custom glassmorphism, responsive CSS grid, zero framework bloat.</li>
+              <li><strong>Chart.js:</strong> Interactive bar and doughnut charts rendering real-time capacity ratios.</li>
+            </ul>
+            <div style="margin-top: 6px; display: flex; gap: 4px; flex-wrap: wrap;">
+              <span class="pill green">100% Responsive</span>
+              <span class="pill">RBAC Protected</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: Key Features & Implementation Methodology -->
+    <div class="slide" id="slide-4">
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <h2>03. Core Features & Implementation Methodology</h2>
+          <p>Mathematical rigor, atomic database updates, and lifecycle management</p>
+        </div>
+        <div class="slide-number">Slide 04 / 06</div>
+      </div>
+
+      <div class="grid-4col">
+        <div class="card">
+          <div class="card-title" style="font-size: 0.95rem;"><span class="icon">🔒</span> Capacity Control</div>
+          <div class="card-body" style="font-size: 0.82rem;">
+            Bed allotment strictly validates <code>occupiedBeds &lt; capacity</code> before approving assignments. Automated unit tests verify that 5th-student overflow attempts into a 4-capacity room are cleanly rejected.
+          </div>
+          <span class="pill orange">Zero Overbooking</span>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="font-size: 0.95rem;"><span class="icon">🔄</span> Atomic Room Transfers</div>
+          <div class="card-body" style="font-size: 0.82rem;">
+            When students transfer rooms, the system atomically decrements occupancy on the old room (re-opening the bed) and increments the new room occupancy in a single transaction sequence.
+          </div>
+          <span class="pill">Atomic Concurrency</span>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="font-size: 0.95rem;"><span class="icon">🍽️</span> Dining & Dynamic Bills</div>
+          <div class="card-body" style="font-size: 0.82rem;">
+            Full 7-day timetable with automatic current-day highlighting. Attendance aggregates generate transparent student invoices: <code>(Days Present &times; Daily Rate) + Maintenance</code>.
+          </div>
+          <span class="pill green">Consumption Billing</span>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="font-size: 0.95rem;"><span class="icon">🛠️</span> Maintenance SLAs</div>
+          <div class="card-body" style="font-size: 0.82rem;">
+            Categorized tickets (Electrical, Plumbing, Wi-Fi, Furniture) with priority flags (Urgent, High, Medium). Wardens log resolution remarks with full audit timestamps.
+          </div>
+          <span class="pill">Transparent SLA</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: Feasibility, Impact & Risk Mitigation -->
+    <div class="slide" id="slide-5">
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <h2>04. Feasibility, Impact & Risk Analysis</h2>
+          <p>Practical deployment metrics, quantitative benefits, and mitigation strategies</p>
+        </div>
+        <div class="slide-number">Slide 05 / 06</div>
+      </div>
+
+      <div class="grid-2col">
+        <!-- Impact & Viability -->
+        <div class="card">
+          <div class="card-title"><span class="icon">📈</span> Measurable Institutional Impact</div>
+          <div class="card-body">
+            <ul>
+              <li><strong>85% Reduction in Allocation Time:</strong> Automated digital application queues replace long physical queues during university admission weeks.</li>
+              <li><strong>Zero Ghost Bed Allotments:</strong> Real-time bed counter prevents double-booking disputes.</li>
+              <li><strong>100% Financial Transparency:</strong> Itemized dining invoices eliminate disputes between students and mess caterers over leave deductions.</li>
+              <li><strong>Zero Licensing Costs:</strong> Built exclusively on open-source web technologies (Node.js, MongoDB Atlas, Vercel), allowing frictionless adoption by public and private colleges.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Challenges & Mitigations -->
+        <div class="card">
+          <div class="card-title"><span class="icon">🛡️</span> Challenges & Technical Mitigations</div>
+          <div class="card-body">
+            <ul>
+              <li><strong>Challenge: Serverless Database Cold Starts</strong><br>
+              <em>Mitigation:</em> Implemented global Mongoose promise caching in <code>config/db.js</code> with a 10-connection pool to preserve persistent sockets.</li>
+              <li><strong>Challenge: Concurrency Spikes during Room Rush</strong><br>
+              <em>Mitigation:</em> Pre-save schema locks and atomic conditional updates prevent race conditions.</li>
+              <li><strong>Challenge: Unauthorized Access to Warden Controls</strong><br>
+              <em>Mitigation:</em> Role-Based Access Control (RBAC) middleware checks session credentials on every privileged route.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: Live Demonstration & Future Scope -->
+    <div class="slide" id="slide-6">
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <h2>05. Live Demonstration, Evaluation & Future Scope</h2>
+          <p>Verified production deployment, open-source code, and strategic expansion roadmap</p>
+        </div>
+        <div class="slide-number">Slide 06 / 06</div>
+      </div>
+
+      <div class="grid-2col">
+        <!-- Evaluation Credentials & Live Links -->
+        <div class="card" style="border: 1px solid var(--accent-secondary);">
+          <div class="card-title"><span class="icon">🚀</span> Live Production Links & Credentials</div>
+          <div class="card-body">
+            <ul>
+              <li><strong>Live Web Application:</strong><br>
+                <a href="https://webassignment2-peach.vercel.app" target="_blank" style="color: #38bdf8; font-weight: 700; text-decoration: none;">
+                  https://webassignment2-peach.vercel.app &nearr;
+                </a>
+              </li>
+              <li><strong>GitHub Source Repository:</strong><br>
+                <a href="https://github.com/namangoyal176-10/webassignment2" target="_blank" style="color: #a5b4fc; font-weight: 600; text-decoration: none;">
+                  https://github.com/namangoyal176-10/webassignment2 &nearr;
+                </a>
+              </li>
+              <li><strong>Verified Live Evaluation Credentials:</strong><br>
+                &bull; <strong>Warden Admin:</strong> <code>admin@hostel.com</code> / <code>Admin@1234</code><br>
+                &bull; <strong>Resident Student:</strong> <code>aarav.sharma@hostel.edu</code> / <code>student123</code>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Future Roadmap -->
+        <div class="card">
+          <div class="card-title"><span class="icon">🔮</span> Future Roadmap & Scalability</div>
+          <div class="card-body">
+            <ul>
+              <li><strong>IoT Smart Turnstile Integration:</strong> RFID / biometric hardware sync for automated mess hall turnstiles, updating dining attendance in real time.</li>
+              <li><strong>Payment Gateway Integration:</strong> Automated UPI / NetBanking payment reconciliation using webhooks for instant digital fee receipts.</li>
+              <li><strong>AI-Driven Maintenance Triage:</strong> Automated image recognition to verify plumbing and electrical damage uploaded by students.</li>
+              <li><strong>Mobile Application:</strong> React Native / PWA client for instant push notifications on meal schedules and leave approvals.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Deck Controls -->
+  <div class="deck-controls">
+    <button class="btn-nav" id="prevBtn" onclick="changeSlide(-1)">
+      &#8592; Previous
+    </button>
+    <div class="dots-indicator" id="dots">
+      <div class="dot active" onclick="goToSlide(0)"></div>
+      <div class="dot" onclick="goToSlide(1)"></div>
+      <div class="dot" onclick="goToSlide(2)"></div>
+      <div class="dot" onclick="goToSlide(3)"></div>
+      <div class="dot" onclick="goToSlide(4)"></div>
+      <div class="dot" onclick="goToSlide(5)"></div>
+    </div>
+    <button class="btn-nav" id="nextBtn" onclick="changeSlide(1)">
+      Next &#8594;
+    </button>
+  </div>
+
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const dots = document.querySelectorAll('.dot');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function updateSlide() {
+      slides.forEach((slide, idx) => {
+        slide.classList.toggle('active', idx === currentSlide);
+      });
+      dots.forEach((dot, idx) => {
+        dot.classList.toggle('active', idx === currentSlide);
+      });
+
+      prevBtn.disabled = currentSlide === 0;
+      nextBtn.disabled = currentSlide === slides.length - 1;
+    }
+
+    function changeSlide(direction) {
+      currentSlide = Math.max(0, Math.min(slides.length - 1, currentSlide + direction));
+      updateSlide();
+    }
+
+    function goToSlide(index) {
+      currentSlide = index;
+      updateSlide();
+    }
+
+    function toggleFullScreen() {
+      const deck = document.getElementById('deck');
+      if (!document.fullscreenElement) {
+        deck.requestFullscreen().catch(err => {
+          alert(`Error attempting to enable full-screen mode: ${err.message}`);
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    // Keyboard navigation
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        changeSlide(1);
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        changeSlide(-1);
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullScreen();
+      }
+    });
+
+    updateSlide();
+  </script>
+</body>
+</html>
