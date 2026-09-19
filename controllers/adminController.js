@@ -15,6 +15,70 @@ const DAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 
  */
 exports.getDashboard = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      const demoData = require('../services/demoData');
+      const todayIndex = new Date().getDay();
+      const todayName = DAYS[todayIndex];
+      const todayMenu = demoData.messMenu ? demoData.messMenu[todayName] : null;
+
+      const totalBlocks = demoData.blocks.length;
+      const totalRooms = demoData.rooms.length;
+      const totalBeds = demoData.rooms.reduce((acc, r) => acc + r.capacity, 0);
+      const occupiedBeds = demoData.rooms.reduce((acc, r) => acc + r.occupiedBeds, 0);
+      const availableBeds = Math.max(0, totalBeds - occupiedBeds);
+      const occupancyPercent = totalBeds > 0 ? Math.round((occupiedBeds / totalBeds) * 100) : 0;
+
+      const availableRoomsCount = demoData.rooms.filter((r) => r.status === 'Available').length;
+      const partiallyOccupiedRoomsCount = demoData.rooms.filter((r) => r.status === 'Partially Occupied').length;
+      const fullRoomsCount = demoData.rooms.filter((r) => r.status === 'Full').length;
+      const maintenanceRoomsCount = demoData.rooms.filter((r) => r.status === 'Maintenance').length;
+
+      const blockBreakdown = demoData.blocks.map((b) => {
+        const blockRooms = demoData.rooms.filter((r) => r.block._id === b._id);
+        const blockCapacity = blockRooms.reduce((acc, r) => acc + r.capacity, 0);
+        const blockOccupied = blockRooms.reduce((acc, r) => acc + r.occupiedBeds, 0);
+        return {
+          _id: b._id,
+          name: b.name,
+          blockNumber: b.blockNumber,
+          gender: b.gender,
+          totalRooms: blockRooms.length,
+          capacity: blockCapacity,
+          occupied: blockOccupied,
+          available: Math.max(0, blockCapacity - blockOccupied),
+          occupancyPercent: blockCapacity > 0 ? Math.round((blockOccupied / blockCapacity) * 100) : 0,
+        };
+      });
+
+      return res.render('admin/dashboard', {
+        pageTitle: 'Admin Dashboard - Overview',
+        stats: {
+          totalBlocks,
+          totalRooms,
+          totalBeds,
+          occupiedBeds,
+          availableBeds,
+          occupancyPercent,
+          availableRoomsCount,
+          partiallyOccupiedRoomsCount,
+          fullRoomsCount,
+          maintenanceRoomsCount,
+          pendingRoomRequests: demoData.roomRequests.filter((r) => r.status === 'Pending').length,
+          pendingRoomChangeRequests: demoData.roomChangeRequests.filter((r) => r.status === 'Pending').length,
+          pendingMaintenanceRequests: demoData.maintenanceRequests.filter((r) => r.status !== 'Resolved').length,
+          totalFeedbackCount: demoData.mealFeedback.length,
+          avgRating: '4.3',
+          currentMonthCollection: 4350,
+        },
+        blockBreakdown,
+        todayName: todayName.charAt(0).toUpperCase() + todayName.slice(1),
+        todayMenu,
+        recentRequests: demoData.roomRequests,
+        recentMaintenance: demoData.maintenanceRequests,
+      });
+    }
+
     // 1. Hostel Occupancy Statistics
     const blocks = await HostelBlock.find().sort({ name: 1 });
     const rooms = await Room.find().populate('block');
@@ -132,6 +196,17 @@ exports.getDashboard = async (req, res) => {
  */
 exports.getStudents = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      const demoData = require('../services/demoData');
+      return res.render('admin/students', {
+        pageTitle: 'Student Directory',
+        students: demoData.students,
+        blocks: demoData.blocks,
+        filters: { search: '', block: '', status: 'all' },
+      });
+    }
+
     const { search, block, status } = req.query;
 
     let query = { role: 'student' };

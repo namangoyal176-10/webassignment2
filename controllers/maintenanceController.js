@@ -6,6 +6,17 @@ const User = require('../models/User');
  */
 exports.getStudentMaintenance = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      const demoData = require('../services/demoData');
+      return res.render('student/maintenance', {
+        pageTitle: 'Maintenance Requests',
+        student: demoData.students[0],
+        room: demoData.students[0].room,
+        requests: demoData.maintenanceRequests.filter((m) => m.student._id === 'stu-001'),
+      });
+    }
+
     const student = await User.findById(req.session.userId).populate({
       path: 'room',
       populate: { path: 'block' },
@@ -84,6 +95,16 @@ exports.postStudentMaintenance = async (req, res) => {
  */
 exports.getAdminMaintenance = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      const demoData = require('../services/demoData');
+      return res.render('admin/maintenance', {
+        pageTitle: 'Maintenance Request Management',
+        requests: demoData.maintenanceRequests,
+        filters: { status: 'all', priority: 'all', category: 'all' },
+      });
+    }
+
     const { status, priority, category } = req.query;
     const filter = {};
 

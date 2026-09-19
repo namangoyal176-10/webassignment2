@@ -12,6 +12,17 @@ const MONTHS = [
  */
 exports.getStudentBills = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      const demoData = require('../services/demoData');
+      const bills = demoData.messBills.filter((b) => b.student._id === 'stu-001');
+      return res.render('student/bills', {
+        pageTitle: 'My Mess Bills',
+        bills,
+        totalDue: 0,
+      });
+    }
+
     const bills = await MessBill.find({ student: req.session.userId }).sort({ year: -1, generatedAt: -1 });
 
     const totalDue = bills
@@ -34,6 +45,22 @@ exports.getStudentBills = async (req, res) => {
  */
 exports.getAdminBills = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      const demoData = require('../services/demoData');
+      return res.render('admin/bills', {
+        pageTitle: 'Mess Bills & Collections',
+        bills: demoData.messBills,
+        months: MONTHS,
+        currentMonth: 'September',
+        currentYear: 2026,
+        totalBilled: 8130,
+        totalCollected: 4350,
+        totalPending: 3780,
+        filters: { month: 'all', year: 'all', status: 'all' },
+      });
+    }
+
     const { month, year, status } = req.query;
     const filter = {};
 

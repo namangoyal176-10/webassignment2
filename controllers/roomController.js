@@ -27,6 +27,27 @@ function computeRoomStatus(room) {
 
 exports.getBlocks = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      const demoData = require('../services/demoData');
+      const blockStats = demoData.blocks.map((b) => {
+        const rooms = demoData.rooms.filter((r) => r.block._id === b._id);
+        const totalBeds = rooms.reduce((sum, r) => sum + r.capacity, 0);
+        const occupiedBeds = rooms.reduce((sum, r) => sum + r.occupiedBeds, 0);
+        return {
+          ...b,
+          roomCount: rooms.length,
+          totalBeds,
+          occupiedBeds,
+          availableBeds: Math.max(0, totalBeds - occupiedBeds),
+        };
+      });
+      return res.render('admin/blocks', {
+        pageTitle: 'Hostel Block Management',
+        blocks: blockStats,
+      });
+    }
+
     const blocks = await HostelBlock.find().sort({ blockNumber: 1 });
     
     // Augment with live room counts and occupancy
@@ -141,6 +162,18 @@ exports.deleteBlock = async (req, res) => {
 
 exports.getRooms = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      const demoData = require('../services/demoData');
+      return res.render('admin/rooms', {
+        pageTitle: 'Room Management',
+        rooms: demoData.rooms,
+        blocks: demoData.blocks,
+        unallottedStudents: demoData.students.filter((s) => !s.room),
+        filters: { block: '', roomType: '', status: '', search: '' },
+      });
+    }
+
     const { block, roomType, status, search } = req.query;
     const filter = {};
 
@@ -392,6 +425,17 @@ exports.vacateStudent = async (req, res) => {
 
 exports.getRoomRequests = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      const demoData = require('../services/demoData');
+      return res.render('admin/room-requests', {
+        pageTitle: 'Room Allotment Requests',
+        requests: demoData.roomRequests,
+        availableRooms: demoData.rooms.filter((r) => r.status === 'Available'),
+        selectedStatus: 'All',
+      });
+    }
+
     const { status } = req.query;
     const filter = {};
     if (status) filter.status = status;
@@ -525,6 +569,16 @@ exports.rejectRoomRequest = async (req, res) => {
 
 exports.getRoomChangeRequests = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      const demoData = require('../services/demoData');
+      return res.render('admin/room-change-requests', {
+        pageTitle: 'Room Change Requests',
+        requests: demoData.roomChangeRequests,
+        selectedStatus: 'All',
+      });
+    }
+
     const { status } = req.query;
     const filter = {};
     if (status) filter.status = status;

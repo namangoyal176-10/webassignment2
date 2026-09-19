@@ -55,19 +55,32 @@ async function attachUser(req, res, next) {
   }
 
   if (req.session && req.session.userId) {
-    try {
-      const user = await User.findById(req.session.userId).populate({
-        path: 'room',
-        populate: { path: 'block' },
-      });
-      if (user) {
-        res.locals.currentUser = user;
-      } else {
-        // User record was deleted from database
-        req.session.destroy();
+    const mongoose = require('mongoose');
+    const isDemoUser = req.session.userId.startsWith('admin') || req.session.userId.startsWith('stu');
+    
+    if (mongoose.connection.readyState === 1 && !isDemoUser) {
+      try {
+        const user = await User.findById(req.session.userId).populate({
+          path: 'room',
+          populate: { path: 'block' },
+        });
+        if (user) {
+          res.locals.currentUser = user;
+        } else {
+          // User record was deleted from database
+          req.session.destroy();
+        }
+      } catch (err) {
+        console.error('Error fetching current user:', err.message);
       }
-    } catch (err) {
-      console.error('Error fetching current user:', err.message);
+    } else {
+      // Provide demo user in preview demo mode
+      const demoData = require('../services/demoData');
+      if (req.session.role === 'admin') {
+        res.locals.currentUser = demoData.admin;
+      } else {
+        res.locals.currentUser = demoData.students[0];
+      }
     }
   }
 

@@ -14,6 +14,27 @@ const DAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 
  */
 exports.getDashboard = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      const demoData = require('../services/demoData');
+      const student = demoData.students[0];
+      const todayIndex = new Date().getDay();
+      const todayName = DAYS[todayIndex];
+      const todayMeals = demoData.messMenu ? demoData.messMenu[todayName] : null;
+
+      return res.render('student/dashboard', {
+        pageTitle: 'Student Dashboard',
+        student,
+        room: student.room,
+        latestRoomRequest: demoData.roomRequests[1],
+        latestChangeRequest: null,
+        pendingMaintenance: demoData.maintenanceRequests.filter((m) => m.student._id === student._id),
+        todayName: todayName.charAt(0).toUpperCase() + todayName.slice(1),
+        todayMeals,
+        latestBill: demoData.messBills[0],
+      });
+    }
+
     const student = await User.findById(req.session.userId).populate({
       path: 'room',
       populate: [
@@ -69,6 +90,17 @@ exports.getDashboard = async (req, res) => {
  */
 exports.getRoom = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      const demoData = require('../services/demoData');
+      const student = demoData.students[0];
+      return res.render('student/room', {
+        pageTitle: 'My Room Details',
+        student,
+        room: student.room,
+      });
+    }
+
     const student = await User.findById(req.session.userId).populate({
       path: 'room',
       populate: [
@@ -93,6 +125,19 @@ exports.getRoom = async (req, res) => {
  */
 exports.getRoomRequest = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      const demoData = require('../services/demoData');
+      const student = demoData.students[0];
+      return res.render('student/room-request', {
+        pageTitle: 'Request Hostel Room',
+        student,
+        blocks: demoData.blocks,
+        requests: demoData.roomRequests,
+        hasPendingRequest: false,
+      });
+    }
+
     const student = await User.findById(req.session.userId).populate('room');
     const blocks = await HostelBlock.find().sort({ name: 1 });
     const requests = await RoomRequest.find({ student: student._id })
@@ -178,6 +223,20 @@ exports.postRoomRequest = async (req, res) => {
  */
 exports.getRoomChange = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      const demoData = require('../services/demoData');
+      const student = demoData.students[0];
+      return res.render('student/room-change', {
+        pageTitle: 'Room Change Request',
+        student,
+        currentRoom: student.room,
+        availableRooms: demoData.rooms.filter((r) => r.status === 'Available'),
+        requests: demoData.roomChangeRequests,
+        hasPendingRequest: false,
+      });
+    }
+
     const student = await User.findById(req.session.userId).populate({
       path: 'room',
       populate: { path: 'block' },
@@ -295,6 +354,15 @@ exports.postRoomChange = async (req, res) => {
  */
 exports.getProfile = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      const demoData = require('../services/demoData');
+      return res.render('student/profile', {
+        pageTitle: 'My Profile',
+        student: demoData.students[0],
+      });
+    }
+
     const student = await User.findById(req.session.userId).populate({
       path: 'room',
       populate: { path: 'block' },

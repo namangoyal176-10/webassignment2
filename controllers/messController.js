@@ -33,6 +33,18 @@ function getCurrentDayKey() {
  */
 exports.getStudentMess = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      const demoData = require('../services/demoData');
+      return res.render('student/mess', {
+        pageTitle: 'Weekly Mess Menu',
+        menu: demoData.messMenu,
+        currentDay: getCurrentDayKey(),
+        days: DAYS,
+        dayNames: DAY_NAMES,
+      });
+    }
+
     let menu = await MessMenu.findOne({ isActive: true });
     if (!menu) {
       menu = await MessMenu.findOne().sort({ createdAt: -1 });
@@ -58,6 +70,16 @@ exports.getStudentMess = async (req, res) => {
  */
 exports.getStudentFeedback = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      const demoData = require('../services/demoData');
+      return res.render('student/feedback', {
+        pageTitle: 'Meal Feedback',
+        today: getTodayString(),
+        feedbacks: demoData.mealFeedback,
+      });
+    }
+
     const today = getTodayString();
     const feedbacks = await MealFeedback.find({ student: req.session.userId })
       .sort({ createdAt: -1 });
@@ -142,6 +164,17 @@ exports.postStudentFeedback = async (req, res) => {
  */
 exports.getAdminMessMenu = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      const demoData = require('../services/demoData');
+      return res.render('admin/mess-menu', {
+        pageTitle: 'Manage Weekly Mess Menu',
+        menu: demoData.messMenu,
+        days: DAYS,
+        dayNames: DAY_NAMES,
+      });
+    }
+
     let menu = await MessMenu.findOne({ isActive: true });
     if (!menu) {
       menu = await MessMenu.create({
@@ -207,6 +240,24 @@ exports.postAdminMessMenu = async (req, res) => {
  */
 exports.getAdminFeedback = async (req, res) => {
   try {
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      const demoData = require('../services/demoData');
+      return res.render('admin/feedback', {
+        pageTitle: 'Student Meal Feedback & Ratings',
+        feedbacks: demoData.mealFeedback,
+        mealStats: {
+          Breakfast: { avg: '4.2', count: 1 },
+          Lunch: { avg: '4.0', count: 1 },
+          Snacks: { avg: '4.5', count: 1 },
+          Dinner: { avg: '4.8', count: 1 },
+        },
+        overallAvg: '4.3',
+        totalCount: demoData.mealFeedback.length,
+        filters: { mealType: 'all', rating: 'all' },
+      });
+    }
+
     const { mealType, rating } = req.query;
     const filter = {};
 
