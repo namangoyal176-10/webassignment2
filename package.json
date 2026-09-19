@@ -7,7 +7,8 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "seed": "node scripts/seed.js",
-    "test:capacity": "node scripts/test-capacity.js"
+    "test:capacity": "node scripts/test-capacity.js",
+    "pptx": "node scripts/generate-pptx.js"
   },
   "keywords": [
     "hostel",
@@ -33,7 +34,8 @@
     "morgan": "^1.10.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.9",
+    "pptxgenjs": "^4.0.1"
   },
   "engines": {
     "node": ">=18.0.0"
